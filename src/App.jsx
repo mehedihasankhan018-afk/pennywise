@@ -168,7 +168,7 @@ export default function Pennywise() {
           setBills([...fixed,...d.bills.filter(b=>b.custom)]);
         }
       }
-      // Add a tiny delay to show off the beautiful spinner transition
+      // Pulse animation delays loader for smooth feel
       setTimeout(() => setLoaded(true), 800);
     })();
   },[]);
@@ -332,7 +332,7 @@ export default function Pennywise() {
     </div>
   );
 
-  // ── Loader Render ──
+  // ── Loader Render (ONLY Logo, NO Text as requested) ──
   if (!loaded) {
     return (
       <div style={{
@@ -342,53 +342,23 @@ export default function Pennywise() {
         alignItems: "center",
         justifyContent: "center",
         background: "#0d0d11",
-        fontFamily: F,
-        color: "#f0effe",
         overflow: "hidden",
       }}>
         <div style={{
+          width: 84,
+          height: 84,
+          borderRadius: 24,
+          background: "linear-gradient(135deg, #7c3aed, #a855f7)",
           display: "flex",
-          flexDirection: "column",
           alignItems: "center",
-          gap: 20,
+          justifyContent: "center",
+          boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
+          border: "1px solid rgba(255, 255, 255, 0.15)",
           animation: "pw-pulse 1.8s infinite ease-in-out"
         }}>
-          <div style={{
-            width: 84,
-            height: 84,
-            borderRadius: 24,
-            background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
-            border: "1px solid rgba(255, 255, 255, 0.15)",
-          }}>
-            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{width: 42, height: 42}}>
-              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-            </svg>
-          </div>
-          <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
-            <span style={{
-              fontSize: 30,
-              fontWeight: 900,
-              letterSpacing: "-1px",
-              color: "#fff",
-              background: "linear-gradient(135deg, #fff, #a78bfa)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              fontFamily: F
-            }}>Pennywise</span>
-            <span style={{
-              fontSize: 10,
-              color: "#8887a8",
-              fontWeight: 700,
-              letterSpacing: "0.15em",
-              textTransform: "uppercase",
-              marginTop: 6,
-              fontFamily: F
-            }}>Household Meal & Bill Tracker</span>
-          </div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{width: 42, height: 42}}>
+            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+          </svg>
         </div>
         <style>{`
           @keyframes pw-pulse {
@@ -516,7 +486,7 @@ export default function Pennywise() {
                               onChange={e=>updMeal(pi,di,e.target.value)}
                               onBlur={e=>{if(e.target.value==="")updMeal(pi,di,0);}}
                               placeholder="0"
-                              style={{width:56,padding:"6px 0",borderRadius:8,border:`1.5px solid ${v>0?cc.bg+"88":T.brd}`,textAlign:"center",fontWeight:v>0?800:400,color:v>0?cT:T.mut,background:v>0?cL:T.sur2,outline:"none",fontSize:14,fontFamily:F,transition:"all .15s"}}/>
+                              style={{width:56,padding:"6px 4px",borderRadius:8,border:`1.5px solid ${v>0?cc.bg+"88":T.brd}`,textAlign:"center",fontWeight:v>0?800:400,color:v>0?cT:T.mut,background:v>0?cL:T.sur2,outline:"none",fontSize:14,fontFamily:F,transition:"all .15s"}}/>
                           </td>
                         );
                       })}
@@ -779,7 +749,7 @@ export default function Pennywise() {
       {toast&&<Toast msg={toast.msg} type={toast.type}/>}
       {showReset&&<ConfirmSheet title="Reset month?" body="All meals and bill amounts will be cleared. Cannot be undone." onOk={resetAll} onClose={()=>setShowReset(false)} T={T}/>}
 
-      {/* ── HEADER ── */}
+      {/* ── HEADER (Beautiful glassmorphism with original sizing rules) ── */}
       <div style={{
         background: dark ? "rgba(22, 22, 29, 0.8)" : "rgba(244, 244, 248, 0.8)",
         backdropFilter: "blur(12px)",
@@ -794,17 +764,17 @@ export default function Pennywise() {
         minHeight: 56,
         zIndex: 10
       }}>
-        <span className="header-logo" style={{fontSize:22,fontWeight:900,letterSpacing:"-0.8px",color:"#7c3aed",fontFamily:F}}>Pennywise</span>
+        <span style={{fontSize:22,fontWeight:900,letterSpacing:"-0.8px",color:"#7c3aed",fontFamily:F}}>Pennywise</span>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <div className="header-calendar" style={{display:"flex",alignItems:"center",gap:6,padding:"7px 11px",borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2}}>
+          <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 11px",borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2}}>
             <Ic k="calendar" z={13} c={T.mut}/>
-            <input className="header-calendar-input" value={monthName} onChange={e=>setMonthName(e.target.value)} placeholder="Month"
+            <input value={monthName} onChange={e=>setMonthName(e.target.value)} placeholder="Month"
               style={{border:"none",outline:"none",fontSize:13,fontWeight:700,fontFamily:F,background:"transparent",color:T.txt,width:85}}/>
           </div>
-          <button className="header-btn" onClick={()=>setDark(d=>!d)} style={{width:36,height:36,borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+          <button onClick={()=>setDark(d=>!d)} style={{width:36,height:36,borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
             <Ic k={dark?"sun":"moon"} z={17} c={dark?"#fbbf24":"#7c3aed"}/>
           </button>
-          <button className="header-btn" onClick={()=>setShowReset(true)} style={{width:36,height:36,borderRadius:10,border:"none",background:"linear-gradient(135deg,#dc2626,#ef4444)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 3px 10px rgba(220,38,38,.35)"}}>
+          <button onClick={()=>setShowReset(true)} style={{width:36,height:36,borderRadius:10,border:"none",background:"linear-gradient(135deg,#dc2626,#ef4444)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 3px 10px rgba(220,38,38,.35)"}}>
             <Ic k="reset" z={16} c="#fff"/>
           </button>
         </div>
@@ -837,7 +807,7 @@ export default function Pennywise() {
         </div>
       </div>
 
-      {/* ── BOTTOM NAV ── */}
+      {/* ── BOTTOM NAV (Glassmorphic layout with original text styles) ── */}
       <div style={{
         position:"fixed",bottom:0,left:0,right:0,zIndex:100,
         background: dark ? "rgba(22, 22, 29, 0.85)" : "rgba(255, 255, 255, 0.88)",
@@ -852,7 +822,7 @@ export default function Pennywise() {
             <div style={{width:40,height:36,borderRadius:11,background:pageIdx===n.idx?T.accBg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>
               <Ic k={n.ik} z={22} c={pageIdx===n.idx?T.acc:T.sub}/>
             </div>
-            <span style={{fontSize:10,fontWeight:700,color:pageIdx===n.idx?T.acc:T.mut,fontFamily:F,letterSpacing:"0.04em",lineHeight:1,marginTop:1,whiteSpace:"nowrap",textAlign:"center"}}>{n.l}</span>
+            <span style={{fontSize:10,fontWeight:700,color:pageIdx===n.idx?T.acc:T.mut,fontFamily:F,letterSpacing:"0.04em",lineHeight:1,marginTop:1}}>{n.l}</span>
           </button>
         ))}
       </div>
@@ -874,21 +844,13 @@ export default function Pennywise() {
         
         input,select,button,td,th,span,div,p,h2,h3,label{font-family:${F}!important;}
         
-        /* Center numbers on mobile & remove spinners */
-        input[type=number]{
-          -moz-appearance:textfield !important;
-          text-align:center !important;
-        }
-        input[type=number]::-webkit-inner-spin-button,
-        input[type=number]::-webkit-outer-spin-button{
-          -webkit-appearance:none !important;
-          margin:0 !important;
-        }
+        /* Reverted global inputs centering. Text position is naturally left-aligned as before! */
+        input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         
         /* Focus state micro-animation */
         input:focus,select:focus{
           border-color:${T.acc}!important;
-          box-shadow:0 0 0 3px ${dark?"rgba(167,139,250,.22)":"rgba(124,58,237,.14)"}!important;
+          box-shadow:0 0 0 3px ${dark?"rgba(167,139,250,.16)":"rgba(124,58,237,.12)"}!important;
           transform: translateY(-1px);
         }
         
@@ -910,45 +872,6 @@ export default function Pennywise() {
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:${T.brd2};border-radius:10px;}
         @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-        
-        /* Mobile Layout & Alignment adjustments */
-        @media (max-width: 480px) {
-          .header-logo {
-            font-size: 20px !important;
-            letter-spacing: -0.6px !important;
-          }
-          .header-calendar {
-            padding: 5px 8px !important;
-            gap: 4px !important;
-          }
-          .header-calendar-input {
-            width: 68px !important;
-            font-size: 12px !important;
-          }
-          .header-btn {
-            width: 32px !important;
-            height: 32px !important;
-          }
-        }
-        
-        @media (max-width: 360px) {
-          .header-logo {
-            font-size: 17px !important;
-            letter-spacing: -0.5px !important;
-          }
-          .header-calendar {
-            padding: 4px 6px !important;
-            gap: 3px !important;
-          }
-          .header-calendar-input {
-            width: 54px !important;
-            font-size: 11px !important;
-          }
-          .header-btn {
-            width: 28px !important;
-            height: 28px !important;
-          }
-        }
       `}</style>
     </div>
   );
