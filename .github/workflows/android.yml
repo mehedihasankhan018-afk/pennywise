@@ -21,14 +21,14 @@ jobs:
       - name: Install Dependencies
         run: npm install
 
-      - name: Build App
+      - name: Build Web App
         run: npm run build
 
       - name: Install Capacitor
         run: npm install @capacitor/core @capacitor/cli @capacitor/android
 
-      - name: Copy Capacitor Files
-        run: npx cap copy android
+      - name: Sync Capacitor
+        run: npx cap sync android
 
       - name: Build APK
         run: |
