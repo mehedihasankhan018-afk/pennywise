@@ -168,7 +168,8 @@ export default function Pennywise() {
           setBills([...fixed,...d.bills.filter(b=>b.custom)]);
         }
       }
-      setLoaded(true);
+      // Add a tiny delay to show off the beautiful spinner transition
+      setTimeout(() => setLoaded(true), 800);
     })();
   },[]);
 
@@ -287,7 +288,18 @@ export default function Pennywise() {
   };
 
   // ── Styles ───────────────────────────────────────────────
-  const card=(extra={})=>({background:T.sur,borderRadius:16,border:`1px solid ${T.brd}`,overflow:"hidden",boxShadow:dark?"0 2px 14px rgba(0,0,0,.3)":"0 1px 10px rgba(0,0,0,.06)",...extra});
+  const card=(extra={})=>({
+    background: dark ? "rgba(22, 22, 29, 0.72)" : "rgba(255, 255, 255, 0.78)",
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
+    borderRadius: 16,
+    border: `1px solid ${dark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)"}`,
+    overflow: "hidden",
+    boxShadow: dark 
+      ? "0 4px 24px -2px rgba(0, 0, 0, 0.4), 0 2px 8px -1px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.04)"
+      : "0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
+    ...extra
+  });
 
   const Btn=(v="primary")=>({
     padding:"11px 18px",borderRadius:11,cursor:"pointer",fontWeight:700,fontSize:14,fontFamily:F,
@@ -299,10 +311,10 @@ export default function Pennywise() {
     boxShadow:v==="primary"?"0 4px 14px rgba(124,58,237,.3)":v==="danger"?"0 3px 12px rgba(220,38,38,.28)":"none",
   });
 
-  const inp=(ex={})=>({width:"100%",padding:"11px 13px",borderRadius:11,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:15,fontWeight:600,fontFamily:F,boxSizing:"border-box",background:T.sur2,color:T.txt,transition:"border-color .2s",...ex});
+  const inp=(ex={})=>({width:"100%",padding:"11px 13px",borderRadius:11,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:15,fontWeight:600,fontFamily:F,boxSizing:"border-box",background:T.sur2,color:T.txt,transition:"all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",...ex});
 
   const Chip=({ik,val,lbl,c})=>(
-    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0}}>
+    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0,transition: "all 0.3s"}}>
       <Ic k={ik} z={18} c={c}/>
       <div style={{minWidth:0}}>
         <div style={{fontSize:17,fontWeight:800,color:c,letterSpacing:"-0.3px",lineHeight:1.1,fontFamily:F,whiteSpace:"nowrap"}}>{val}</div>
@@ -320,6 +332,75 @@ export default function Pennywise() {
     </div>
   );
 
+  // ── Loader Render ──
+  if (!loaded) {
+    return (
+      <div style={{
+        height: "100dvh",
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "#0d0d11",
+        fontFamily: F,
+        color: "#f0effe",
+        overflow: "hidden",
+      }}>
+        <div style={{
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 20,
+          animation: "pw-pulse 1.8s infinite ease-in-out"
+        }}>
+          <div style={{
+            width: 84,
+            height: 84,
+            borderRadius: 24,
+            background: "linear-gradient(135deg, #7c3aed, #a855f7)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
+            border: "1px solid rgba(255, 255, 255, 0.15)",
+          }}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{width: 42, height: 42}}>
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
+            </svg>
+          </div>
+          <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}>
+            <span style={{
+              fontSize: 30,
+              fontWeight: 900,
+              letterSpacing: "-1px",
+              color: "#fff",
+              background: "linear-gradient(135deg, #fff, #a78bfa)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              fontFamily: F
+            }}>Pennywise</span>
+            <span style={{
+              fontSize: 10,
+              color: "#8887a8",
+              fontWeight: 700,
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              marginTop: 6,
+              fontFamily: F
+            }}>Household Meal & Bill Tracker</span>
+          </div>
+        </div>
+        <style>{`
+          @keyframes pw-pulse {
+            0% { transform: scale(0.96); opacity: 0.8; }
+            50% { transform: scale(1.04); opacity: 1; filter: drop-shadow(0 0 16px rgba(124, 58, 237, 0.3)); }
+            100% { transform: scale(0.96); opacity: 0.8; }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   // ──────────────────────────────────────────────────────────
   // Page 0: MEALS
   const mealsJSX = (
@@ -331,7 +412,7 @@ export default function Pennywise() {
       </div>
       {/* Chips */}
       <div style={{display:"flex",gap:10}}>
-        <Chip ik="cart"  val={totMkt.toFixed(0)} lbl="TOTAL BAZAR AMOUNT" c={T.acc}/>
+        <Chip ik="cart"  val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc}/>
         <Chip ik="users" val={people.length}      lbl="PEOPLE" c={T.grn}/>
       </div>
 
@@ -340,7 +421,7 @@ export default function Pennywise() {
         const cc=PAL[i%PAL.length], pos=p.bal>=0;
         const cL=dark?cc.dl:cc.ll, cT=dark?cc.dt:cc.lt;
         return (
-          <div key={i} style={card({borderLeft:`3px solid ${cc.bg}`})}>
+          <div key={i} style={card({borderLeft:`4px solid ${cc.bg}`})}>
             <div style={{padding:"14px 14px 0"}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
                 <Avatar name={p.name} ci={i} size={40}/>
@@ -410,7 +491,7 @@ export default function Pennywise() {
                   <th style={{padding:"8px 10px",textAlign:"center",fontWeight:800,color:T.sub,borderBottom:`1px solid ${T.brd}`,fontSize:10,textTransform:"uppercase",letterSpacing:"0.07em",fontFamily:F,width:36}}>DAY</th>
                   {people.map((p,i)=>(
                     <th key={i} style={{padding:"10px 8px",borderBottom:`1px solid ${T.brd}`,minWidth:80}}>
-                      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
                         <Avatar name={p.name} ci={i} size={20}/>
                         <span style={{fontWeight:800,color:T.txt,fontSize:12,fontFamily:F,whiteSpace:"nowrap"}}>{p.name}</span>
                       </div>
@@ -435,7 +516,7 @@ export default function Pennywise() {
                               onChange={e=>updMeal(pi,di,e.target.value)}
                               onBlur={e=>{if(e.target.value==="")updMeal(pi,di,0);}}
                               placeholder="0"
-                              style={{width:56,padding:"6px 4px",borderRadius:8,border:`1.5px solid ${v>0?cc.bg+"88":T.brd}`,textAlign:"center",fontWeight:v>0?800:400,color:v>0?cT:T.mut,background:v>0?cL:T.sur2,outline:"none",fontSize:14,fontFamily:F,transition:"all .15s"}}/>
+                              style={{width:56,padding:"6px 0",borderRadius:8,border:`1.5px solid ${v>0?cc.bg+"88":T.brd}`,textAlign:"center",fontWeight:v>0?800:400,color:v>0?cT:T.mut,background:v>0?cL:T.sur2,outline:"none",fontSize:14,fontFamily:F,transition:"all .15s"}}/>
                           </td>
                         );
                       })}
@@ -553,7 +634,7 @@ export default function Pennywise() {
 
       {/* Bill rows */}
       {bills.map((b,i)=>(
-        <div key={b.id} style={card({borderLeft:`3px solid ${b.color}`,padding:"13px 14px",display:"flex",alignItems:"center",gap:10,overflow:"visible"})}>
+        <div key={b.id} style={card({borderLeft:`4px solid ${b.color}`,padding:"13px 14px",display:"flex",alignItems:"center",gap:10,overflow:"visible"})}>
           <div style={{width:36,height:36,borderRadius:10,background:b.color+"1a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <Ic k={b.ik||"receipt"} z={18} c={b.color}/>
           </div>
@@ -699,18 +780,31 @@ export default function Pennywise() {
       {showReset&&<ConfirmSheet title="Reset month?" body="All meals and bill amounts will be cleared. Cannot be undone." onOk={resetAll} onClose={()=>setShowReset(false)} T={T}/>}
 
       {/* ── HEADER ── */}
-      <div style={{background:T.sur,borderBottom:`1px solid ${T.brd}`,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,boxShadow:dark?"0 2px 16px rgba(0,0,0,.4)":"0 1px 8px rgba(0,0,0,.07)",minHeight:56}}>
-        <span style={{fontSize:22,fontWeight:900,letterSpacing:"-0.8px",color:"#7c3aed",fontFamily:F}}>Pennywise</span>
+      <div style={{
+        background: dark ? "rgba(22, 22, 29, 0.8)" : "rgba(244, 244, 248, 0.8)",
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderBottom: `1px solid ${dark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)"}`,
+        padding: "10px 14px",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        flexShrink: 0,
+        boxShadow: dark ? "0 4px 20px rgba(0, 0, 0, 0.3)" : "0 2px 10px rgba(0, 0, 0, 0.04)",
+        minHeight: 56,
+        zIndex: 10
+      }}>
+        <span className="header-logo" style={{fontSize:22,fontWeight:900,letterSpacing:"-0.8px",color:"#7c3aed",fontFamily:F}}>Pennywise</span>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 11px",borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2}}>
+          <div className="header-calendar" style={{display:"flex",alignItems:"center",gap:6,padding:"7px 11px",borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2}}>
             <Ic k="calendar" z={13} c={T.mut}/>
-            <input value={monthName} onChange={e=>setMonthName(e.target.value)} placeholder="Month"
+            <input className="header-calendar-input" value={monthName} onChange={e=>setMonthName(e.target.value)} placeholder="Month"
               style={{border:"none",outline:"none",fontSize:13,fontWeight:700,fontFamily:F,background:"transparent",color:T.txt,width:85}}/>
           </div>
-          <button onClick={()=>setDark(d=>!d)} style={{width:36,height:36,borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+          <button className="header-btn" onClick={()=>setDark(d=>!d)} style={{width:36,height:36,borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
             <Ic k={dark?"sun":"moon"} z={17} c={dark?"#fbbf24":"#7c3aed"}/>
           </button>
-          <button onClick={()=>setShowReset(true)} style={{width:36,height:36,borderRadius:10,border:"none",background:"linear-gradient(135deg,#dc2626,#ef4444)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 3px 10px rgba(220,38,38,.35)"}}>
+          <button className="header-btn" onClick={()=>setShowReset(true)} style={{width:36,height:36,borderRadius:10,border:"none",background:"linear-gradient(135deg,#dc2626,#ef4444)",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",boxShadow:"0 3px 10px rgba(220,38,38,.35)"}}>
             <Ic k="reset" z={16} c="#fff"/>
           </button>
         </div>
@@ -744,13 +838,21 @@ export default function Pennywise() {
       </div>
 
       {/* ── BOTTOM NAV ── */}
-      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:T.sur,borderTop:`1px solid ${T.brd}`,display:"flex",padding:"6px 0 max(10px,env(safe-area-inset-bottom))",boxShadow:dark?"0 -4px 20px rgba(0,0,0,.35)":"0 -2px 14px rgba(0,0,0,.08)"}}>
+      <div style={{
+        position:"fixed",bottom:0,left:0,right:0,zIndex:100,
+        background: dark ? "rgba(22, 22, 29, 0.85)" : "rgba(255, 255, 255, 0.88)",
+        backdropFilter: "blur(20px)",
+        WebkitBackdropFilter: "blur(20px)",
+        borderTop: `1px solid ${dark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)"}`,
+        display:"flex",padding:"6px 0 max(10px,env(safe-area-inset-bottom))",
+        boxShadow: dark ? "0 -8px 24px rgba(0,0,0,.4)" : "0 -4px 16px rgba(0,0,0,.05)"
+      }}>
         {[{idx:0,ik:"utensils",l:"MEALS"},{idx:1,ik:"receipt",l:"BILLS"},{idx:2,ik:"chart",l:"SUMMARY"}].map(n=>(
           <button key={n.idx} onClick={()=>goTo(n.idx)} style={{flex:1,padding:"4px 0",border:"none",background:"transparent",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
             <div style={{width:40,height:36,borderRadius:11,background:pageIdx===n.idx?T.accBg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>
               <Ic k={n.ik} z={22} c={pageIdx===n.idx?T.acc:T.sub}/>
             </div>
-            <span style={{fontSize:10,fontWeight:700,color:pageIdx===n.idx?T.acc:T.mut,fontFamily:F,letterSpacing:"0.04em",lineHeight:1,marginTop:1}}>{n.l}</span>
+            <span style={{fontSize:10,fontWeight:700,color:pageIdx===n.idx?T.acc:T.mut,fontFamily:F,letterSpacing:"0.04em",lineHeight:1,marginTop:1,whiteSpace:"nowrap",textAlign:"center"}}>{n.l}</span>
           </button>
         ))}
       </div>
@@ -760,15 +862,93 @@ export default function Pennywise() {
         *{box-sizing:border-box;margin:0;padding:0;}
         html,body,#root{height:100%;overflow:hidden;}
         body{background:${T.bg};color:${T.txt};font-family:${F};-webkit-font-smoothing:antialiased;}
+        
+        /* Smooth Theme Transitions */
+        div, button, input, span, table, th, td, p, h2, select {
+          transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                      background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
         input,select,button,td,th,span,div,p,h2,h3,label{font-family:${F}!important;}
-        input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-        input:focus,select:focus{border-color:${T.acc}!important;box-shadow:0 0 0 3px ${dark?"rgba(167,139,250,.16)":"rgba(124,58,237,.12)"}!important;}
+        
+        /* Center numbers on mobile & remove spinners */
+        input[type=number]{
+          -moz-appearance:textfield !important;
+          text-align:center !important;
+        }
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button{
+          -webkit-appearance:none !important;
+          margin:0 !important;
+        }
+        
+        /* Focus state micro-animation */
+        input:focus,select:focus{
+          border-color:${T.acc}!important;
+          box-shadow:0 0 0 3px ${dark?"rgba(167,139,250,.22)":"rgba(124,58,237,.14)"}!important;
+          transform: translateY(-1px);
+        }
+        
+        /* Premium button hover/active effects */
+        button {
+          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
+        }
+        button:hover {
+          transform: translateY(-1.5px);
+          filter: brightness(1.08);
+        }
+        button:active{
+          opacity:.8;
+          transform:scale(.96) translateY(0px) !important;
+        }
+        
         select option{background:${T.sur2};color:${T.txt};}
-        button:active{opacity:.8;transform:scale(.97);}
         ::-webkit-scrollbar{height:3px;width:3px;}
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:${T.brd2};border-radius:10px;}
         @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        
+        /* Mobile Layout & Alignment adjustments */
+        @media (max-width: 480px) {
+          .header-logo {
+            font-size: 20px !important;
+            letter-spacing: -0.6px !important;
+          }
+          .header-calendar {
+            padding: 5px 8px !important;
+            gap: 4px !important;
+          }
+          .header-calendar-input {
+            width: 68px !important;
+            font-size: 12px !important;
+          }
+          .header-btn {
+            width: 32px !important;
+            height: 32px !important;
+          }
+        }
+        
+        @media (max-width: 360px) {
+          .header-logo {
+            font-size: 17px !important;
+            letter-spacing: -0.5px !important;
+          }
+          .header-calendar {
+            padding: 4px 6px !important;
+            gap: 3px !important;
+          }
+          .header-calendar-input {
+            width: 54px !important;
+            font-size: 11px !important;
+          }
+          .header-btn {
+            width: 28px !important;
+            height: 28px !important;
+          }
+        }
       `}</style>
     </div>
   );
