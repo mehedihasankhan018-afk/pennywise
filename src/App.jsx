@@ -302,11 +302,11 @@ export default function Pennywise() {
   const inp=(ex={})=>({width:"100%",padding:"11px 13px",borderRadius:11,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:15,fontWeight:600,fontFamily:F,boxSizing:"border-box",background:T.sur2,color:T.txt,transition:"border-color .2s",...ex});
 
   const Chip=({ik,val,lbl,c})=>(
-    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 13px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)"}}>
-      <Ic k={ik} z={20} c={c}/>
-      <div>
-        <div style={{fontSize:17,fontWeight:800,color:c,letterSpacing:"-0.3px",lineHeight:1.1,fontFamily:F}}>{val}</div>
-        <div style={{fontSize:9,color:T.mut,fontWeight:700,letterSpacing:"0.07em",fontFamily:F}}>{lbl}</div>
+    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0}}>
+      <Ic k={ik} z={18} c={c}/>
+      <div style={{minWidth:0}}>
+        <div style={{fontSize:17,fontWeight:800,color:c,letterSpacing:"-0.3px",lineHeight:1.1,fontFamily:F,whiteSpace:"nowrap"}}>{val}</div>
+        <div style={{fontSize:9,color:T.mut,fontWeight:700,letterSpacing:"0.06em",fontFamily:F,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl}</div>
       </div>
     </div>
   );
@@ -324,9 +324,14 @@ export default function Pennywise() {
   // Page 0: MEALS
   const mealsJSX = (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      {/* Panel header */}
+      <div style={{marginBottom:2}}>
+        <h2 style={{fontSize:20,fontWeight:900,color:T.txt,letterSpacing:"-0.5px",fontFamily:F,margin:0,lineHeight:1.2}}>Meals</h2>
+        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:3}}>Track daily meals & bazar contributions</p>
+      </div>
       {/* Chips */}
       <div style={{display:"flex",gap:10}}>
-        <Chip ik="cart"  val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc}/>
+        <Chip ik="cart"  val={totMkt.toFixed(0)} lbl="TOTAL BAZAR AMOUNT" c={T.acc}/>
         <Chip ik="users" val={people.length}      lbl="PEOPLE" c={T.grn}/>
       </div>
 
@@ -354,7 +359,7 @@ export default function Pennywise() {
                 </button>
               </div>
               <div style={{marginBottom:12}}>
-                <div style={{fontSize:10,color:T.mut,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:5,fontFamily:F}}>BAZAR</div>
+                <div style={{fontSize:10,color:T.mut,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:5,fontFamily:F}}>Bazar Amount</div>
                 <input type="number" min="0" value={p.market} onChange={e=>updMkt(i,e.target.value)} placeholder="0"
                   style={{...inp({border:`1.5px solid ${p.market?cc.bg+"88":T.brd2}`,color:p.market?cT:T.mut,background:p.market?cL:T.sur2,fontSize:18,fontWeight:800})}}/>
               </div>
@@ -365,9 +370,9 @@ export default function Pennywise() {
                 {l:"COST", v:p.cost.toFixed(0), co:cT, bg:cL},
                 {l:"BALANCE",v:(pos?"+":"")+p.bal.toFixed(0), co:pos?T.grn:T.red, bg:pos?(dark?"rgba(52,211,153,.1)":"rgba(5,150,105,.07)"):(dark?"rgba(248,113,113,.1)":"rgba(220,38,38,.07)")},
               ].map((x,j)=>(
-                <div key={j} style={{padding:"10px 12px",background:x.bg,borderLeft:j>0?`1px solid ${T.brd}`:"none"}}>
-                  <div style={{fontSize:9,color:T.mut,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.06em",fontFamily:F,marginBottom:3}}>{x.l}</div>
-                  <div style={{fontSize:15,fontWeight:800,color:x.co,fontFamily:F}}>{x.v}</div>
+                <div key={j} style={{padding:"10px 8px",background:x.bg,borderLeft:j>0?`1px solid ${T.brd}`:"none",textAlign:"center"}}>
+                  <div style={{fontSize:9,color:T.mut,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.05em",fontFamily:F,marginBottom:4,lineHeight:1}}>{x.l}</div>
+                  <div style={{fontSize:16,fontWeight:800,color:x.co,fontFamily:F,lineHeight:1}}>{x.v}</div>
                 </div>
               ))}
             </div>
@@ -392,7 +397,7 @@ export default function Pennywise() {
       {/* Meal table / chart */}
       <div style={card()}>
         <div style={{display:"flex",gap:4,padding:"10px 12px",borderBottom:`1px solid ${T.brd}`,background:T.sur2}}>
-          {[{k:"table",l:"TABLE"},{k:"chart",l:"CHART"}].map(t=>(
+          {[{k:"table",l:"TABLE"},{k:"pie",l:"PIE CHART"}].map(t=>(
             <button key={t.k} onClick={()=>setMealTab(t.k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:"none",cursor:"pointer",fontWeight:700,fontSize:12,fontFamily:F,background:mealTab===t.k?"linear-gradient(135deg,#7c3aed,#a855f7)":"transparent",color:mealTab===t.k?"#fff":T.sub,boxShadow:mealTab===t.k?"0 2px 10px rgba(124,58,237,.3)":"none",transition:"all .15s"}}>{t.l}</button>
           ))}
         </div>
@@ -402,7 +407,7 @@ export default function Pennywise() {
             <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:Math.max(280,people.length*88+80)}}>
               <thead>
                 <tr style={{background:T.sur2}}>
-                  <th style={{padding:"10px 12px",textAlign:"center",fontWeight:800,color:T.sub,borderBottom:`1px solid ${T.brd}`,fontSize:11,textTransform:"uppercase",letterSpacing:"0.07em",fontFamily:F,width:40}}>DAY</th>
+                  <th style={{padding:"8px 10px",textAlign:"center",fontWeight:800,color:T.sub,borderBottom:`1px solid ${T.brd}`,fontSize:10,textTransform:"uppercase",letterSpacing:"0.07em",fontFamily:F,width:36}}>DAY</th>
                   {people.map((p,i)=>(
                     <th key={i} style={{padding:"10px 8px",borderBottom:`1px solid ${T.brd}`,minWidth:80}}>
                       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
@@ -420,7 +425,7 @@ export default function Pennywise() {
                   const rb=hl?T.accBg:di%2===0?T.sur:T.sur2;
                   return (
                     <tr key={di} onMouseEnter={()=>setHlDay(di)} onMouseLeave={()=>setHlDay(null)} style={{background:rb,borderBottom:`1px solid ${T.brd}`,transition:"background .1s"}}>
-                      <td style={{padding:"6px 12px",fontWeight:700,color:T.mut,fontSize:13,fontFamily:F,textAlign:"center"}}>{di+1}</td>
+                      <td style={{padding:"6px 8px",fontWeight:700,color:T.mut,fontSize:12,fontFamily:F,textAlign:"center",verticalAlign:"middle"}}>{di+1}</td>
                       {people.map((p,pi)=>{
                         const cc=PAL[pi%PAL.length], v=p.meals[di]||0;
                         const cL=dark?cc.dl:cc.ll, cT=dark?cc.dt:cc.lt;
@@ -455,43 +460,79 @@ export default function Pennywise() {
           </div>
         )}
 
-        {mealTab==="chart"&&(
-          <div style={{padding:"16px 12px"}}>
-            <div style={{fontSize:13,fontWeight:800,color:T.txt,fontFamily:F,marginBottom:12}}>Daily Volume</div>
-            <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-              <div style={{display:"flex",alignItems:"flex-end",gap:3,minWidth:700,height:150}}>
-                {dayTots.map((v,di)=>(
-                  <div key={di} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                    {v>0&&<div style={{fontSize:8,color:T.acc,fontWeight:800,fontFamily:F}}>{v}</div>}
-                    <div style={{width:"100%",height:(v/maxDay)*125||3,borderRadius:"3px 3px 0 0",background:v?"linear-gradient(180deg,#c4b5fd,#7c3aed)":T.brd,minHeight:3}}/>
-                    <div style={{fontSize:8,color:T.mut,fontFamily:F}}>{di+1}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <div style={{fontSize:13,fontWeight:800,color:T.txt,fontFamily:F,margin:"18px 0 12px"}}>Stacked</div>
-            <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-              <div style={{display:"flex",alignItems:"flex-end",gap:3,minWidth:700,height:130}}>
-                {dayTots.map((tot,di)=>(
-                  <div key={di} style={{flex:1,display:"flex",flexDirection:"column",alignItems:"center",gap:2}}>
-                    <div style={{width:"100%",height:(tot/maxDay)*110||3,borderRadius:"3px 3px 0 0",overflow:"hidden",display:"flex",flexDirection:"column-reverse",minHeight:3}}>
-                      {people.map((p,pi)=>{ const v=Number(p.meals[di]||0); return <div key={pi} style={{height:tot>0?`${(v/tot)*100}%`:0,background:PAL[pi%PAL.length].bg,minHeight:v>0?2:0}}/>; })}
+        {mealTab==="pie"&&(()=>{
+          // Build pie chart data
+          const slices = pStats.map((p,i)=>({
+            name:p.name, meals:p.m, color:PAL[i%PAL.length].bg, grad:PAL[i%PAL.length].gr, ci:i
+          })).filter(s=>s.meals>0);
+          const total = slices.reduce((a,s)=>a+s.meals,0);
+
+          // SVG donut chart
+          const R=80, r=48, cx=100, cy=100;
+          let startAngle = -Math.PI/2;
+          const arcs = slices.map(s=>{
+            const pct = s.meals/total;
+            const end = startAngle + pct*2*Math.PI;
+            const x1=cx+R*Math.cos(startAngle), y1=cy+R*Math.sin(startAngle);
+            const x2=cx+R*Math.cos(end),        y2=cy+R*Math.sin(end);
+            const ix1=cx+r*Math.cos(startAngle),iy1=cy+r*Math.sin(startAngle);
+            const ix2=cx+r*Math.cos(end),       iy2=cy+r*Math.sin(end);
+            const large = pct>0.5?1:0;
+            const d=`M${x1},${y1} A${R},${R} 0 ${large},1 ${x2},${y2} L${ix2},${iy2} A${r},${r} 0 ${large},0 ${ix1},${iy1} Z`;
+            const midAngle = startAngle + pct*Math.PI;
+            startAngle = end;
+            return {...s, d, pct, midAngle};
+          });
+
+          return (
+            <div style={{padding:"18px 14px"}}>
+              <div style={{fontSize:12,color:T.sub,fontFamily:F,marginBottom:16,fontWeight:500}}>Meal distribution by member</div>
+              {total===0
+                ? <div style={{textAlign:"center",padding:"32px 0",color:T.mut,fontFamily:F,fontSize:14}}>No meals recorded yet</div>
+                : <>
+                    {/* SVG Donut */}
+                    <div style={{display:"flex",alignItems:"center",justifyContent:"center",marginBottom:20}}>
+                      <div style={{position:"relative",width:200,height:200}}>
+                        <svg viewBox="0 0 200 200" width="200" height="200">
+                          <defs>
+                            {arcs.map((a,i)=>(
+                              <linearGradient key={i} id={`pg${i}`} x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stopColor={PAL[a.ci%PAL.length].bg}/>
+                                <stop offset="100%" stopColor={PAL[a.ci%PAL.length].bg+"cc"}/>
+                              </linearGradient>
+                            ))}
+                          </defs>
+                          {arcs.map((a,i)=>(
+                            <path key={i} d={a.d} fill={`url(#pg${i})`}
+                              style={{filter:"drop-shadow(0 2px 4px rgba(0,0,0,0.3))",transition:"opacity .2s"}}/>
+                          ))}
+                          {/* Centre text */}
+                          <text x="100" y="96" textAnchor="middle" fill={T.txt} fontSize="22" fontWeight="800" fontFamily="Cause,Outfit,sans-serif">{total}</text>
+                          <text x="100" y="112" textAnchor="middle" fill={T.mut} fontSize="10" fontWeight="600" fontFamily="Cause,Outfit,sans-serif">TOTAL MEALS</text>
+                        </svg>
+                      </div>
                     </div>
-                    <div style={{fontSize:8,color:T.mut,fontFamily:F}}>{di+1}</div>
-                  </div>
-                ))}
-              </div>
+                    {/* Legend */}
+                    <div style={{display:"flex",flexDirection:"column",gap:10}}>
+                      {arcs.map((a,i)=>(
+                        <div key={i} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 14px",background:T.sur2,borderRadius:12,border:`1px solid ${T.brd}`}}>
+                          <div style={{width:14,height:14,borderRadius:4,background:a.grad,flexShrink:0,boxShadow:`0 2px 6px ${a.color}55`}}/>
+                          <div style={{display:"flex",alignItems:"center",gap:8,flex:1,minWidth:0}}>
+                            <Avatar name={a.name} ci={a.ci} size={28}/>
+                            <span style={{fontWeight:700,fontSize:14,color:T.txt,fontFamily:F,flex:1,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{a.name}</span>
+                          </div>
+                          <div style={{textAlign:"right",flexShrink:0}}>
+                            <div style={{fontSize:16,fontWeight:800,color:a.color,fontFamily:F}}>{a.meals}</div>
+                            <div style={{fontSize:10,color:T.mut,fontWeight:700,fontFamily:F}}>{(a.pct*100).toFixed(1)}%</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </>
+              }
             </div>
-            <div style={{display:"flex",gap:14,flexWrap:"wrap",marginTop:10}}>
-              {people.map((p,i)=>(
-                <div key={i} style={{display:"flex",alignItems:"center",gap:6}}>
-                  <div style={{width:10,height:10,borderRadius:3,background:PAL[i%PAL.length].gr}}/>
-                  <span style={{fontSize:12,color:T.txt,fontWeight:700,fontFamily:F}}>{p.name}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+          );
+        })()}
       </div>
     </div>
   );
@@ -499,25 +540,15 @@ export default function Pennywise() {
   // Page 1: BILLS
   const billsJSX = (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      {/* Panel header */}
+      <div style={{marginBottom:2}}>
+        <h2 style={{fontSize:20,fontWeight:900,color:T.txt,letterSpacing:"-0.5px",fontFamily:F,margin:0,lineHeight:1.2}}>Bills</h2>
+        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:3}}>Manage monthly household expenses</p>
+      </div>
       {/* Chips */}
       <div style={{display:"flex",gap:10}}>
         <Chip ik="receipt" val={totBills.toFixed(0)}                                 lbl="TOTAL BILLS" c={T.sky}/>
         <Chip ik="user"    val={(people.length?totBills/people.length:0).toFixed(0)} lbl="PER PERSON"  c={T.acc}/>
-      </div>
-
-      {/* Add bill button */}
-      <div style={{display:"flex",justifyContent:"flex-end"}}>
-        {showAddBill
-          ?<div style={{display:"flex",gap:7,alignItems:"center"}}>
-             <input autoFocus value={newBillName} onChange={e=>setNewBillName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addBill()} placeholder="Bill name…"
-               style={{padding:"8px 12px",borderRadius:9,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:13,fontWeight:700,fontFamily:F,background:T.sur2,color:T.txt,width:140}}/>
-             <button onClick={addBill} style={{...Btn("primary"),padding:"8px 14px",fontSize:13}}><Ic k="check" z={12} c="#fff"/>Add</button>
-             <button onClick={()=>{setShowAddBill(false);setNewBillName("");}} style={{...Btn("ghost"),padding:"8px 12px",fontSize:13}}>✕</button>
-           </div>
-          :<button onClick={()=>setShowAddBill(true)} style={{...Btn("ghost"),padding:"8px 14px",fontSize:13,outline:`1px solid ${T.brd2}`,gap:6}}>
-             <Ic k="plus" z={13} c={T.acc}/><span style={{color:T.acc}}>ADD BILL</span>
-           </button>
-        }
       </div>
 
       {/* Bill rows */}
@@ -526,7 +557,7 @@ export default function Pennywise() {
           <div style={{width:36,height:36,borderRadius:10,background:b.color+"1a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <Ic k={b.ik||"receipt"} z={18} c={b.color}/>
           </div>
-          <span style={{fontWeight:800,fontSize:15,color:T.txt,fontFamily:F,flexShrink:0,minWidth:90}}>{b.label}</span>
+          <span style={{fontWeight:700,fontSize:14,color:T.txt,fontFamily:F,flexShrink:0,minWidth:0,flex:"0 0 auto",maxWidth:"38%",whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{b.label}</span>
           <input type="number" min="0" value={b.amount} onChange={e=>updBill(i,e.target.value)} placeholder="0"
             style={{flex:1,padding:"8px 11px",borderRadius:9,border:`1.5px solid ${b.amount?b.color+"88":T.brd2}`,outline:"none",fontSize:16,fontWeight:800,color:b.amount?b.color:T.mut,background:b.amount?b.color+"12":T.sur2,fontFamily:F,boxSizing:"border-box",transition:"all .2s",minWidth:0}}/>
           {b.custom&&(
@@ -536,12 +567,33 @@ export default function Pennywise() {
           )}
         </div>
       ))}
+
+      {/* ADD BILL — at bottom */}
+      {showAddBill
+        ?<div style={card({padding:14,display:"flex",flexDirection:"column",gap:10})}>
+           <div style={{fontSize:11,color:T.mut,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase",fontFamily:F,marginBottom:2}}>New Bill</div>
+           <input autoFocus value={newBillName} onChange={e=>setNewBillName(e.target.value)} onKeyDown={e=>e.key==="Enter"&&addBill()} placeholder="Bill name…"
+             style={{width:"100%",padding:"10px 13px",borderRadius:10,border:`1.5px solid ${T.acc}`,outline:"none",fontSize:14,fontWeight:700,fontFamily:F,background:T.sur2,color:T.txt,boxSizing:"border-box"}}/>
+           <div style={{display:"flex",gap:8}}>
+             <button onClick={addBill} style={{...Btn("primary"),flex:1}}><Ic k="check" z={14} c="#fff"/>Add Bill</button>
+             <button onClick={()=>{setShowAddBill(false);setNewBillName("");}} style={{...Btn("ghost"),flex:1}}>Cancel</button>
+           </div>
+         </div>
+        :<button onClick={()=>setShowAddBill(true)} style={{width:"100%",padding:"13px",borderRadius:14,border:`2px dashed ${T.brd2}`,background:"transparent",cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",gap:8,color:T.acc,fontWeight:700,fontSize:14,fontFamily:F}}>
+           <Ic k="plus" z={18} c={T.acc}/>ADD NEW BILL
+         </button>
+      }
     </div>
   );
 
   // Page 2: SUMMARY
   const summaryJSX = (
     <div style={{display:"flex",flexDirection:"column",gap:14}}>
+      {/* Panel header */}
+      <div style={{marginBottom:2}}>
+        <h2 style={{fontSize:20,fontWeight:900,color:T.txt,letterSpacing:"-0.5px",fontFamily:F,margin:0,lineHeight:1.2}}>Summary</h2>
+        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:3}}>Full financial overview & settlement guide</p>
+      </div>
       {/* Chips 2×2 */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
         <Chip ik="cart"    val={totMkt.toFixed(0)}    lbl="BAZAR"  c={T.acc}/>
@@ -554,11 +606,11 @@ export default function Pennywise() {
       <div style={card()}>
         <SH ik="utensils" title="MEAL BREAKDOWN"/>
         <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
-          <table style={{width:"100%",borderCollapse:"collapse",fontSize:13,minWidth:300}}>
+          <table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:0}}>
             <thead>
               <tr style={{background:T.sur2}}>
-                {["PERSON","MEALS","RATE","COST","BALANCE"].map((h,idx)=>(
-                  <th key={h} style={{padding:"10px 10px",textAlign:idx===0?"left":"center",fontWeight:800,color:T.mut,borderBottom:`2px solid ${T.brd}`,fontSize:10,textTransform:"uppercase",letterSpacing:"0.07em",fontFamily:F}}>{h}</th>
+                {["PERSON","MEALS","RATE","COST","BAL"].map((h,idx)=>(
+                  <th key={h} style={{padding:"9px 8px",textAlign:idx===0?"left":"center",fontWeight:800,color:T.mut,borderBottom:`2px solid ${T.brd}`,fontSize:9,textTransform:"uppercase",letterSpacing:"0.06em",fontFamily:F,whiteSpace:"nowrap"}}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -567,16 +619,16 @@ export default function Pennywise() {
                 const pos=p.bal>=0;
                 return (
                   <tr key={i} style={{borderBottom:`1px solid ${T.brd}`}}>
-                    <td style={{padding:"11px 10px"}}>
-                      <div style={{display:"flex",alignItems:"center",gap:8}}>
-                        <Avatar name={p.name} ci={i} size={26}/>
-                        <span style={{fontWeight:800,color:T.txt,fontFamily:F,fontSize:13}}>{p.name}</span>
+                    <td style={{padding:"10px 8px"}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6}}>
+                        <Avatar name={p.name} ci={i} size={22}/>
+                        <span style={{fontWeight:800,color:T.txt,fontFamily:F,fontSize:12,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis",maxWidth:72}}>{p.name}</span>
                       </div>
                     </td>
-                    <td style={{textAlign:"center",padding:"11px 10px",fontWeight:800,color:T.txt,fontFamily:F}}>{p.m}</td>
-                    <td style={{textAlign:"center",padding:"11px 10px",fontWeight:600,color:T.sub,fontFamily:F,fontSize:12}}>{rate.toFixed(1)}</td>
-                    <td style={{textAlign:"center",padding:"11px 10px",fontWeight:800,color:T.red,fontFamily:F}}>{p.cost.toFixed(0)}</td>
-                    <td style={{textAlign:"center",padding:"11px 10px"}}>
+                    <td style={{textAlign:"center",padding:"10px 6px",fontWeight:800,color:T.txt,fontFamily:F,fontSize:13}}>{p.m}</td>
+                    <td style={{textAlign:"center",padding:"10px 6px",fontWeight:600,color:T.sub,fontFamily:F,fontSize:11}}>{rate.toFixed(1)}</td>
+                    <td style={{textAlign:"center",padding:"10px 6px",fontWeight:800,color:T.red,fontFamily:F,fontSize:13}}>{p.cost.toFixed(0)}</td>
+                    <td style={{textAlign:"center",padding:"10px 6px"}}>
                       <span style={{fontWeight:800,fontSize:13,color:pos?T.grn:T.red,fontFamily:F}}>{pos?"+":""}{p.bal.toFixed(0)}</span>
                     </td>
                   </tr>
@@ -647,7 +699,7 @@ export default function Pennywise() {
       {showReset&&<ConfirmSheet title="Reset month?" body="All meals and bill amounts will be cleared. Cannot be undone." onOk={resetAll} onClose={()=>setShowReset(false)} T={T}/>}
 
       {/* ── HEADER ── */}
-      <div style={{background:T.sur,borderBottom:`1px solid ${T.brd}`,padding:"11px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,boxShadow:dark?"0 2px 16px rgba(0,0,0,.4)":"0 1px 8px rgba(0,0,0,.07)"}}>
+      <div style={{background:T.sur,borderBottom:`1px solid ${T.brd}`,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,boxShadow:dark?"0 2px 16px rgba(0,0,0,.4)":"0 1px 8px rgba(0,0,0,.07)",minHeight:56}}>
         <span style={{fontSize:22,fontWeight:900,letterSpacing:"-0.8px",color:"#7c3aed",fontFamily:F}}>Pennywise</span>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
           <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 11px",borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2}}>
@@ -698,7 +750,7 @@ export default function Pennywise() {
             <div style={{width:40,height:36,borderRadius:11,background:pageIdx===n.idx?T.accBg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>
               <Ic k={n.ik} z={22} c={pageIdx===n.idx?T.acc:T.sub}/>
             </div>
-            <span style={{fontSize:10,fontWeight:700,color:pageIdx===n.idx?T.acc:T.mut,fontFamily:F,letterSpacing:"0.02em"}}>{n.l}</span>
+            <span style={{fontSize:10,fontWeight:700,color:pageIdx===n.idx?T.acc:T.mut,fontFamily:F,letterSpacing:"0.04em",lineHeight:1,marginTop:1}}>{n.l}</span>
           </button>
         ))}
       </div>
