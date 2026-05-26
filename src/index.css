@@ -52,13 +52,17 @@
 
 body {
   margin: 0;
+  body {
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+}
 }
 
 #root {
   width: 1126px;
   max-width: 100%;
   margin: 0 auto;
-  text-align: center;
+  text-align: left;
   border-inline: 0px solid var(--border);
   min-height: 100svh;
   display: flex;
