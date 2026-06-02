@@ -182,7 +182,7 @@ function CalNoteApp({ onClose, dark }) {
     <div className="calnote-container" style={{ position: "fixed", inset: 0, zIndex: 500, background: bg, display: "flex", flexDirection: "column", fontFamily: "'Atma',sans-serif", animation: "cnUp .28s cubic-bezier(.4,0,.2,1)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px 10px", borderBottom: `1px solid ${brd}`, background: pBg, flexShrink: 0, boxShadow: dark ? "0 2px 12px rgba(0,0,0,.4)" : "0 1px 6px rgba(0,0,0,.07)" }}>
         <div>
-          <div style={{ fontSize: 20, fontWeight: 700, color: "#7c3aed", fontFamily: "'Atma',sans-serif", lineHeight: 1.1 }}>ক্যালনোট</div>
+          <div style={{ fontSize: 25, fontWeight: 700, color: "#7c3aed", fontFamily: "'Atma',sans-serif", lineHeight: 1.1 }}>ক্যালনোট</div>
           <div style={{ fontSize: 11, color: sub, marginTop: 2, fontFamily: "'Atma',sans-serif" }}> </div>
         </div>
         <button onClick={onClose} style={{ width: 36, height: 36, borderRadius: 10, border: `1px solid ${brd}`, background: dark ? "#1c1c26" : "#f4f4f8", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -467,8 +467,8 @@ export default function Pennywise() {
             transition: "all .2s",
           }}
         >
-          <Ic k="note" z={20} c="#7c3aed" />
-          <span style={{ fontSize: 20, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
+          <Ic k="note" z={17} c="#7c3aed" />
+          <span style={{ fontSize: 17, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
         </div>
       </div>
 
