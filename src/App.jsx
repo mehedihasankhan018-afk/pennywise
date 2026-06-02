@@ -125,6 +125,7 @@ function cnSafeCalc(expr) {
   const clean = toEn2(expr).replace(/[^0-9+\-*/.() ]/g,"").trim();
   if (!clean) return null;
   try {
+    // eslint-disable-next-line no-useless-escape
     const tokens = clean.match(/(\d+\.?\d*)|([+\-*\/()])/ ) ? clean.match(/(\d+\.?\d*)|([+\-*\/()])/g) : null;
     if (!tokens) return null;
     let i=0;
@@ -137,6 +138,7 @@ function cnSafeCalc(expr) {
 }
 function cnEvalLine(raw) {
   const en=toEn2(raw);
+  // eslint-disable-next-line no-useless-escape
   if(/[+\-*\/]/.test(en)) return cnSafeCalc(en);
   const m=en.match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null;
 }
@@ -149,35 +151,7 @@ function cnFmtNum(n){
 }
 const CN_KEY="calnote_pw1";
 const cnLoad=()=>{try{const r=localStorage.getItem(CN_KEY);return r?JSON.parse(r):null;}catch{return null;}};
-const cnSave=o=>{try{localStorage.setItem(CN_KEY,JSON.stringify(o));}catch{}};
-
-/* ── Breathing logo ── */
-function BreatheLogo() {
-  const parts = [
-    { ch: "ক্যা", delay: 0   },
-    { ch: "ল",    delay: 0.4 },
-    { ch: "নো",   delay: 0.8 },
-    { ch: "ট",    delay: 1.2 },
-  ];
-  return (
-    <span style={{ display: "flex", alignItems: "baseline" }}>
-      {parts.map(({ ch, delay }) => (
-        <span key={ch + delay} style={{
-          display: "inline-block",
-          fontFamily: "'Atma', sans-serif",
-          fontSize: 26, fontWeight: 700,
-          letterSpacing: "0.5px", color: "#1a1a1a",
-          animationName: "wBreath",
-          animationDuration: "6s",
-          animationTimingFunction: "ease-in-out",
-          animationIterationCount: "infinite",
-          animationDelay: `${delay}s`,
-          lineHeight: 1,
-        }}>{ch}</span>
-      ))}
-    </span>
-  );
-}
+const cnSave=o=>{try{localStorage.setItem(CN_KEY,JSON.stringify(o));}catch{ /* ignore */ }};
 function CalNoteApp({onClose,dark}){
   const saved=cnLoad();
   const [title,setTitle]=useState(saved?.title??"আমার হিসাব");
@@ -188,6 +162,7 @@ function CalNoteApp({onClose,dark}){
   const prev=useRef(0);
   const [pulse,setPulse]=useState(false);
   const total=useMemo(()=>cnCalcTotal(lines),[lines]);
+  // eslint-disable-next-line no-useless-escape
   const lres=useMemo(()=>lines.map(l=>{const en=toEn2(l);if(!/[+\-*\/]/.test(en))return null;return cnEvalLine(l);}),[lines]);
   useEffect(()=>{refs.current=refs.current.slice(0,lines.length);},[lines.length]);
   useEffect(()=>{
@@ -258,6 +233,29 @@ function CalNoteApp({onClose,dark}){
   );
 }
 
+function Chip({ik,val,lbl,c,T,dark}) {
+  return (
+    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0}}>
+      <Ic k={ik} z={18} c={c}/>
+      <div style={{minWidth:0}}>
+        <div style={{fontSize:17,fontWeight:800,color:c,letterSpacing:"-0.3px",lineHeight:1.1,fontFamily:F,whiteSpace:"nowrap"}}>{val}</div>
+        <div style={{fontSize:9,color:T.mut,fontWeight:700,letterSpacing:"0.06em",fontFamily:F,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl}</div>
+      </div>
+    </div>
+  );
+}
+
+function SH({ik,title,right,T}) {
+  return (
+    <div style={{padding:"13px 14px",borderBottom:`1px solid ${T.brd}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+      <div style={{display:"flex",alignItems:"center",gap:8}}>
+        <Ic k={ik} z={16} c={T.acc}/><span style={{fontWeight:800,fontSize:15,color:T.txt,fontFamily:F}}>{title}</span>
+      </div>
+      {right}
+    </div>
+  );
+}
+
 export default function Pennywise() {
   const [dark,       setDark]       = useState(true);
   const T = mkTheme(dark);
@@ -291,7 +289,6 @@ export default function Pennywise() {
   const panel0    = useRef(null);
   const panel1    = useRef(null);
   const panel2    = useRef(null);
-  const panels    = [panel0, panel1, panel2];
   const idxRef    = useRef(0);
   const tx0       = useRef(null);
   const ty0       = useRef(null);
@@ -339,8 +336,9 @@ export default function Pennywise() {
       trackRef.current.style.transform=`translateX(-${n*100/3}%)`;
     }
     // scroll to top
-    if(panels[n]?.current) panels[n].current.scrollTop=0;
-  },[]);
+    const p = [panel0, panel1, panel2][n];
+    if(p?.current) p.current.scrollTop=0;
+  },[panel0, panel1, panel2]);
 
   // ── Swipe handlers ───────────────────────────────────────
   const onTS=e=>{
@@ -396,15 +394,14 @@ export default function Pennywise() {
 
   // ── Calculations ─────────────────────────────────────────
   const sumMeals  = useCallback(p=>p.meals.reduce((a,b)=>a+Number(b||0),0),[]);
-  const totMeals  = useMemo(()=>people.reduce((a,p)=>a+sumMeals(p),0),[people]);
+  const totMeals  = useMemo(()=>people.reduce((a,p)=>a+sumMeals(p),0),[people, sumMeals]);
   const totMkt    = useMemo(()=>people.reduce((a,p)=>a+Number(p.market||0),0),[people]);
   const rate      = totMeals>0?totMkt/totMeals:0;
   const pStats    = useMemo(()=>people.map((p,i)=>{
     const m=sumMeals(p),cost=m*rate,paid=Number(p.market||0);
     return {...p,m,cost,paid,bal:paid-cost,i};
-  }),[people,rate]);
+  }),[people, rate, sumMeals]);
   const dayTots   = useMemo(()=>Array.from({length:DAYS},(_,di)=>people.reduce((s,p)=>s+Number(p.meals[di]||0),0)),[people]);
-  const maxDay    = Math.max(...dayTots,1);
   const totBills  = useMemo(()=>bills.reduce((a,b)=>a+Number(b.amount||0),0),[bills]);
 
   // ── Helpers ──────────────────────────────────────────────
@@ -447,25 +444,6 @@ export default function Pennywise() {
 
   const inp=(ex={})=>({width:"100%",padding:"11px 13px",borderRadius:11,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:15,fontWeight:600,fontFamily:F,boxSizing:"border-box",background:T.sur2,color:T.txt,transition:"border-color .2s",...ex});
 
-  const Chip=({ik,val,lbl,c})=>(
-    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0}}>
-      <Ic k={ik} z={18} c={c}/>
-      <div style={{minWidth:0}}>
-        <div style={{fontSize:17,fontWeight:800,color:c,letterSpacing:"-0.3px",lineHeight:1.1,fontFamily:F,whiteSpace:"nowrap"}}>{val}</div>
-        <div style={{fontSize:9,color:T.mut,fontWeight:700,letterSpacing:"0.06em",fontFamily:F,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>{lbl}</div>
-      </div>
-    </div>
-  );
-
-  const SH=({ik,title,right})=>(
-    <div style={{padding:"13px 14px",borderBottom:`1px solid ${T.brd}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"space-between"}}>
-      <div style={{display:"flex",alignItems:"center",gap:8}}>
-        <Ic k={ik} z={16} c={T.acc}/><span style={{fontWeight:800,fontSize:15,color:T.txt,fontFamily:F}}>{title}</span>
-      </div>
-      {right}
-    </div>
-  );
-
   // ──────────────────────────────────────────────────────────
   // Page 0: MEALS
   const mealsJSX = (
@@ -477,8 +455,8 @@ export default function Pennywise() {
       </div>
       {/* Chips + CalNote button */}
       <div style={{display:"flex",gap:10,alignItems:"stretch"}}>
-        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc}/>
-        <button
+        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc} T={T} dark={dark}/>
+        <div
           onClick={()=>setShowCalNote(true)}
           style={{
             flex:1, display:"flex", flexDirection:"column", alignItems:"flex-start",
@@ -493,7 +471,9 @@ export default function Pennywise() {
             <Ic k="note" z={18} c="#7c3aed"/>
             <span style={{fontSize:14,fontWeight:800,color:"#7c3aed",fontFamily:F,letterSpacing:"-0.2px"}}>CalNote</span>
           </div>
-          
+          <div style={{fontSize:9,color:T.mut,fontWeight:700,letterSpacing:"0.06em",fontFamily:F,whiteSpace:"nowrap",overflow:"hidden",textOverflow:"ellipsis"}}>CALCULATOR NOTE</div>
+        </div>
+      </div>
   
       {/* Person cards */}
       {pStats.map((p,i)=>{
@@ -707,8 +687,8 @@ export default function Pennywise() {
       </div>
       {/* Chips */}
       <div style={{display:"flex",gap:10}}>
-        <Chip ik="receipt" val={totBills.toFixed(0)}                                 lbl="TOTAL BILLS" c={T.sky}/>
-        <Chip ik="user"    val={(people.length?totBills/people.length:0).toFixed(0)} lbl="PER PERSON"  c={T.acc}/>
+        <Chip ik="receipt" val={totBills.toFixed(0)}                                 lbl="TOTAL BILLS" c={T.sky} T={T} dark={dark}/>
+        <Chip ik="user"    val={(people.length?totBills/people.length:0).toFixed(0)} lbl="PER PERSON"  c={T.acc} T={T} dark={dark}/>
       </div>
 
       {/* Bill rows */}
@@ -756,15 +736,15 @@ export default function Pennywise() {
       </div>
       {/* Chips 2×2 */}
       <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:10}}>
-        <Chip ik="cart"    val={totMkt.toFixed(0)}    lbl="BAZAR"  c={T.acc}/>
-        <Chip ik="receipt" val={totBills.toFixed(0)}  lbl="BILLS"  c={T.sky}/>
-        <Chip ik="rate"    val={rate.toFixed(2)}       lbl="RATE"   c={T.amb}/>
-        <Chip ik="users"   val={people.length}         lbl="PEOPLE" c={T.grn}/>
+        <Chip ik="cart"    val={totMkt.toFixed(0)}    lbl="BAZAR"  c={T.acc} T={T} dark={dark}/>
+        <Chip ik="receipt" val={totBills.toFixed(0)}  lbl="BILLS"  c={T.sky} T={T} dark={dark}/>
+        <Chip ik="rate"    val={rate.toFixed(2)}       lbl="RATE"   c={T.amb} T={T} dark={dark}/>
+        <Chip ik="users"   val={people.length}         lbl="PEOPLE" c={T.grn} T={T} dark={dark}/>
       </div>
 
       {/* Meal breakdown */}
       <div style={card()}>
-        <SH ik="utensils" title="MEAL BREAKDOWN"/>
+        <SH ik="utensils" title="MEAL BREAKDOWN" T={T}/>
         <div style={{overflowX:"auto",WebkitOverflowScrolling:"touch"}}>
           <table style={{width:"100%",borderCollapse:"collapse",fontSize:12,minWidth:0}}>
             <thead>
@@ -810,7 +790,7 @@ export default function Pennywise() {
 
       {/* Settlement */}
       <div style={card()}>
-        <SH ik="settle" title="SETTLEMENT"/>
+        <SH ik="settle" title="SETTLEMENT" T={T}/>
         <div style={{padding:"12px 14px",display:"flex",flexDirection:"column",gap:10}}>
           {pStats.filter(p=>p.bal<-0.01).flatMap(debtor=>
             pStats.filter(p=>p.bal>0.01).map((creditor,j)=>(
@@ -836,7 +816,7 @@ export default function Pennywise() {
       {/* Bill details */}
       {bills.some(b=>b.amount)&&(
         <div style={card()}>
-          <SH ik="receipt" title="BILL DETAILS" right={<span style={{fontWeight:800,color:T.sky,fontSize:14,fontFamily:F}}>{totBills.toFixed(2)}</span>}/>
+          <SH ik="receipt" title="BILL DETAILS" right={<span style={{fontWeight:800,color:T.sky,fontSize:14,fontFamily:F}}>{totBills.toFixed(2)}</span>} T={T}/>
           <div style={{padding:"4px 14px 12px"}}>
             {bills.filter(b=>b.amount).map((b,i,arr)=>(
               <div key={b.id} style={{display:"flex",alignItems:"center",gap:10,padding:"10px 0",borderBottom:i<arr.length-1?`1px solid ${T.brd}`:"none"}}>
@@ -938,3 +918,4 @@ export default function Pennywise() {
     </div>
   );
 }
+
