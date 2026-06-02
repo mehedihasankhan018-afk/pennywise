@@ -467,8 +467,8 @@ export default function Pennywise() {
             transition: "all .2s",
           }}
         >
-          <Ic k="note" z={18} c="#7c3aed" />
-          <span style={{ fontSize: 15, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
+          <Ic k="note" z={20} c="#7c3aed" />
+          <span style={{ fontSize: 20, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
         </div>
       </div>
 
