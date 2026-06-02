@@ -454,24 +454,21 @@ export default function Pennywise() {
         <p style={{ fontSize: 12, color: T.sub, fontWeight: 500, fontFamily: F, marginTop: 2 }}>Track daily meals & bazar contributions</p>
       </div>
       {/* Chips + CalNote button */}
-      <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "stretch", width: "100%", maxWidth: 460, margin: "6px auto" }}>
-        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc} T={T} dark={dark} large />
+      <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
+        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc} T={T} dark={dark} />
         <div
           onClick={() => setShowCalNote(true)}
           style={{
-            flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start",
-            gap: 2, padding: "14px 18px",
-            background: dark ? "linear-gradient(135deg,rgba(167,139,250,.15),rgba(124,58,237,.10))" : "linear-gradient(135deg,#f5f3ff,#ede9fe)",
-            borderRadius: 16, border: `1.5px solid ${dark ? "rgba(167,139,250,.45)" : "#c4b5fd"}`,
-            cursor: "pointer", boxShadow: dark ? "0 4px 14px rgba(124,58,237,.25)" : "0 3px 12px rgba(124,58,237,.15)",
+            flex: 1, display: "flex", alignItems: "center", justifyContent: "center",
+            gap: 7, padding: "10px 12px",
+            background: dark ? "linear-gradient(135deg,rgba(167,139,250,.12),rgba(124,58,237,.08))" : "linear-gradient(135deg,#f5f3ff,#ede9fe)",
+            borderRadius: 14, border: `1.5px solid ${dark ? "rgba(167,139,250,.3)" : "#c4b5fd"}`,
+            cursor: "pointer", boxShadow: dark ? "0 2px 10px rgba(124,58,237,.2)" : "0 2px 10px rgba(124,58,237,.1)",
             transition: "all .2s",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-            <Ic k="note" z={22} c="#7c3aed" />
-            <span style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
-          </div>
-          <div style={{ fontSize: 10, color: T.mut, fontWeight: 700, letterSpacing: "0.06em", fontFamily: F, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>CALCULATOR NOTE</div>
+          <Ic k="note" z={18} c="#7c3aed" />
+          <span style={{ fontSize: 15, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
         </div>
       </div>
 
