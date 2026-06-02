@@ -179,7 +179,7 @@ function CalNoteApp({ onClose, dark }) {
     brd = dark ? "#27273a" : "#e5e0d8", txt = dark ? "#f0effe" : "#1a1a1a",
     sub = dark ? "#8887a8" : "#999", mut = dark ? "#50506a" : "#ccc";
   return (
-    <div style={{ position: "fixed", inset: 0, zIndex: 500, background: bg, display: "flex", flexDirection: "column", fontFamily: "'Atma','Outfit',sans-serif", animation: "cnUp .28s cubic-bezier(.4,0,.2,1)" }}>
+    <div className="calnote-container" style={{ position: "fixed", inset: 0, zIndex: 500, background: bg, display: "flex", flexDirection: "column", fontFamily: "'Atma',sans-serif", animation: "cnUp .28s cubic-bezier(.4,0,.2,1)" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 16px 10px", borderBottom: `1px solid ${brd}`, background: pBg, flexShrink: 0, boxShadow: dark ? "0 2px 12px rgba(0,0,0,.4)" : "0 1px 6px rgba(0,0,0,.07)" }}>
         <div>
           <div style={{ fontSize: 20, fontWeight: 700, color: "#7c3aed", fontFamily: "'Atma',sans-serif", lineHeight: 1.1 }}>ক্যালনোট</div>
@@ -213,33 +213,33 @@ function CalNoteApp({ onClose, dark }) {
       </div>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Atma:wght@300;400;500;600;700&display=swap');
+        .calnote-container, .calnote-container * {
+          font-family: 'Atma', sans-serif !important;
+        }
         @keyframes cnUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
         @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
-        *, *::before, *::after {
+        .calnote-container *, .calnote-container *::before, .calnote-container *::after {
           transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease !important;
         }
-        /* Slider track: only transition transform, managed by JS */
-        [data-track] {
-          transition: transform 0.38s cubic-bezier(.25,.46,.45,.94) !important;
-        }
-        /* Every other element: suppress transform transitions */
-        *:not([data-track]) {
-          transition-property: background-color, border-color, color, box-shadow !important;
-        }
-        input, textarea { transition: border-color 0.15s ease, background-color 0.15s ease !important; }
-        svg, svg * { transition: none !important; }
+        .calnote-container input, .calnote-container textarea { transition: border-color 0.15s ease, background-color 0.15s ease !important; }
+        .calnote-container svg, .calnote-container svg * { transition: none !important; }
       `}</style>
     </div>
   );
 }
 
-function Chip({ ik, val, lbl, c, T, dark }) {
+function Chip({ ik, val, lbl, c, T, dark, style, large }) {
+  const padding = large ? "14px 18px" : "10px 12px";
+  const radius = large ? 16 : 14;
+  const iconSize = large ? 22 : 18;
+  const valSize = large ? 19 : 17;
+  const lblSize = large ? 10 : 9;
   return (
-    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 9, padding: "10px 12px", background: T.sur, borderRadius: 14, border: `1px solid ${T.brd}`, boxShadow: dark ? "0 2px 10px rgba(0,0,0,.25)" : "0 1px 8px rgba(0,0,0,.05)", minWidth: 0 }}>
-      <Ic k={ik} z={18} c={c} />
+    <div style={{ flex: 1, display: "flex", alignItems: "center", gap: 9, padding: padding, background: T.sur, borderRadius: radius, border: `1px solid ${T.brd}`, boxShadow: dark ? "0 2px 10px rgba(0,0,0,.25)" : "0 1px 8px rgba(0,0,0,.05)", minWidth: 0, ...style }}>
+      <Ic k={ik} z={iconSize} c={c} />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: 17, fontWeight: 800, color: c, letterSpacing: "-0.3px", lineHeight: 1.1, fontFamily: F, whiteSpace: "nowrap" }}>{val}</div>
-        <div style={{ fontSize: 9, color: T.mut, fontWeight: 700, letterSpacing: "0.06em", fontFamily: F, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{lbl}</div>
+        <div style={{ fontSize: valSize, fontWeight: 800, color: c, letterSpacing: "-0.3px", lineHeight: 1.1, fontFamily: F, whiteSpace: "nowrap" }}>{val}</div>
+        <div style={{ fontSize: lblSize, color: T.mut, fontWeight: 700, letterSpacing: "0.06em", fontFamily: F, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{lbl}</div>
       </div>
     </div>
   );
@@ -332,7 +332,7 @@ export default function Pennywise() {
     setPageIdx(n);
     idxRef.current = n;
     if (trackRef.current) {
-      trackRef.current.style.transition = "transform .38s cubic-bezier(.25,.46,.45,.94)";
+      trackRef.current.style.transition = "transform .45s cubic-bezier(0.16, 1, 0.3, 1)";
       trackRef.current.style.transform = `translateX(-${n * 100 / 3}%)`;
     }
     // scroll to top
@@ -386,7 +386,7 @@ export default function Pennywise() {
     } else {
       // snap back
       if (trackRef.current) {
-        trackRef.current.style.transition = "transform .38s cubic-bezier(.25,.46,.45,.94)";
+        trackRef.current.style.transition = "transform .45s cubic-bezier(0.16, 1, 0.3, 1)";
         trackRef.current.style.transform = `translateX(-${idxRef.current * (100 / 3)}%)`;
       }
     }
@@ -454,24 +454,24 @@ export default function Pennywise() {
         <p style={{ fontSize: 12, color: T.sub, fontWeight: 500, fontFamily: F, marginTop: 2 }}>Track daily meals & bazar contributions</p>
       </div>
       {/* Chips + CalNote button */}
-      <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
-        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc} T={T} dark={dark} />
+      <div style={{ display: "flex", gap: 12, justifyContent: "center", alignItems: "stretch", width: "100%", maxWidth: 460, margin: "6px auto" }}>
+        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc} T={T} dark={dark} large />
         <div
           onClick={() => setShowCalNote(true)}
           style={{
-            flex: 1, display: "flex", flexDirection: "column", alignItems: "flex-start",
-            gap: 4, padding: "10px 13px",
-            background: dark ? "linear-gradient(135deg,rgba(167,139,250,.12),rgba(124,58,237,.08))" : "linear-gradient(135deg,#f5f3ff,#ede9fe)",
-            borderRadius: 14, border: `1.5px solid ${dark ? "rgba(167,139,250,.3)" : "#c4b5fd"}`,
-            cursor: "pointer", boxShadow: dark ? "0 2px 10px rgba(124,58,237,.2)" : "0 2px 10px rgba(124,58,237,.1)",
+            flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "flex-start",
+            gap: 2, padding: "14px 18px",
+            background: dark ? "linear-gradient(135deg,rgba(167,139,250,.15),rgba(124,58,237,.10))" : "linear-gradient(135deg,#f5f3ff,#ede9fe)",
+            borderRadius: 16, border: `1.5px solid ${dark ? "rgba(167,139,250,.45)" : "#c4b5fd"}`,
+            cursor: "pointer", boxShadow: dark ? "0 4px 14px rgba(124,58,237,.25)" : "0 3px 12px rgba(124,58,237,.15)",
             transition: "all .2s",
           }}
         >
-          <div style={{ display: "flex", alignItems: "center", gap: 7 }}>
-            <Ic k="note" z={18} c="#7c3aed" />
-            <span style={{ fontSize: 14, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
+          <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+            <Ic k="note" z={22} c="#7c3aed" />
+            <span style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
           </div>
-          <div style={{ fontSize: 9, color: T.mut, fontWeight: 700, letterSpacing: "0.06em", fontFamily: F, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}></div>
+          <div style={{ fontSize: 10, color: T.mut, fontWeight: 700, letterSpacing: "0.06em", fontFamily: F, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>CALCULATOR NOTE</div>
         </div>
       </div>
 
