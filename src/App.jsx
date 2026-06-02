@@ -72,6 +72,7 @@ function Ic({k,z=18,c="currentColor"}) {
     rate:    <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={s}><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>,
     settle:  <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={s}><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
     allchk:  <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={s}><polyline points="20 6 9 17 4 12"/></svg>,
+    note:    <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={s}><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>,
     bolt:    <svg viewBox="0 0 24 24" fill={c} stroke="none" style={s}><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>,
     flame:   <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={s}><path d="M8.5 14.5A2.5 2.5 0 0011 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 11-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 002.5 3z"/></svg>,
     wifi:    <svg viewBox="0 0 24 24" fill="none" stroke={c} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={s}><path d="M1.42 9a16 16 0 0121.16 0"/><path d="M5 12.55a11 11 0 0114.08 0"/><path d="M10.54 16.1a6 6 0 012.92 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>,
@@ -112,13 +113,157 @@ function ConfirmSheet({title,body,onOk,onClose,T}) {
 }
 
 // ════════════════════════════════════════════════════════════
+
+// ─── CalNote helpers ─────────────────────────────────────────
+const BN2 = "০১২৩৪৫৬৭৮৯";
+const toBn2 = n => String(n).replace(/\d/g, d => BN2[d]);
+const toEn2 = s => String(s)
+  .replace(/[০-৯]/g, d => String(BN2.indexOf(d)))
+  .replace(/×/g,"*").replace(/÷/g,"/").replace(/−/g,"-");
+
+function cnSafeCalc(expr) {
+  const clean = toEn2(expr).replace(/[^0-9+\-*/.() ]/g,"").trim();
+  if (!clean) return null;
+  try {
+    const tokens = clean.match(/(\d+\.?\d*)|([+\-*\/()])/ ) ? clean.match(/(\d+\.?\d*)|([+\-*\/()])/g) : null;
+    if (!tokens) return null;
+    let i=0;
+    const peek=()=>tokens[i], consume=()=>tokens[i++];
+    const parseNum=()=>{ const t=consume(); if(t==="("){const v=cnAdd();consume();return v;} return t===undefined?0:parseFloat(t); };
+    const cnMul=()=>{ let v=parseNum(); while(peek()==="*"||peek()==="/"){const op=consume(),r=parseNum();v=op==="*"?v*r:r!==0?v/r:NaN;} return v; };
+    const cnAdd=()=>{ let v=cnMul(); while(peek()==="+"||peek()==="-"){const op=consume(),r=cnMul();v=op==="+"?v+r:v-r;} return v; };
+    const result=cnAdd(); return isFinite(result)?result:null;
+  } catch { return null; }
+}
+function cnEvalLine(raw) {
+  const en=toEn2(raw);
+  if(/[+\-*\/]/.test(en)) return cnSafeCalc(en);
+  const m=en.match(/-?\d+(\.\d+)?/); return m?parseFloat(m[0]):null;
+}
+function cnCalcTotal(arr){let s=0;arr.forEach(l=>{const v=cnEvalLine(l);if(v!==null&&!isNaN(v))s+=v;});return s;}
+function cnFmtNum(n){
+  if(n===null||isNaN(n))return"";
+  const sign=n<0?"−":"",abs=Math.abs(n);
+  const str=Number.isInteger(abs)?String(abs):abs.toFixed(4).replace(/\.?0+$/,"");
+  return sign+toBn2(str);
+}
+const CN_KEY="calnote_pw1";
+const cnLoad=()=>{try{const r=localStorage.getItem(CN_KEY);return r?JSON.parse(r):null;}catch{return null;}};
+const cnSave=o=>{try{localStorage.setItem(CN_KEY,JSON.stringify(o));}catch{}};
+
+/* ── Breathing logo ── */
+function BreatheLogo() {
+  const parts = [
+    { ch: "ক্যা", delay: 0   },
+    { ch: "ল",    delay: 0.4 },
+    { ch: "নো",   delay: 0.8 },
+    { ch: "ট",    delay: 1.2 },
+  ];
+  return (
+    <span style={{ display: "flex", alignItems: "baseline" }}>
+      {parts.map(({ ch, delay }) => (
+        <span key={ch + delay} style={{
+          display: "inline-block",
+          fontFamily: "'Atma', sans-serif",
+          fontSize: 26, fontWeight: 700,
+          letterSpacing: "0.5px", color: "#1a1a1a",
+          animationName: "wBreath",
+          animationDuration: "6s",
+          animationTimingFunction: "ease-in-out",
+          animationIterationCount: "infinite",
+          animationDelay: `${delay}s`,
+          lineHeight: 1,
+        }}>{ch}</span>
+      ))}
+    </span>
+  );
+}
+function CalNoteApp({onClose,dark}){
+  const saved=cnLoad();
+  const [title,setTitle]=useState(saved?.title??"আমার হিসাব");
+  const [lines,setLines]=useState(Array.isArray(saved?.lines)&&saved.lines.length>0?saved.lines:[""]);
+  const refs=useRef([]);
+  const stimer=useRef(null);
+  const ptimer=useRef(null);
+  const prev=useRef(0);
+  const [pulse,setPulse]=useState(false);
+  const total=useMemo(()=>cnCalcTotal(lines),[lines]);
+  const lres=useMemo(()=>lines.map(l=>{const en=toEn2(l);if(!/[+\-*\/]/.test(en))return null;return cnEvalLine(l);}),[lines]);
+  useEffect(()=>{refs.current=refs.current.slice(0,lines.length);},[lines.length]);
+  useEffect(()=>{
+    if(total!==prev.current){prev.current=total;setPulse(true);clearTimeout(ptimer.current);ptimer.current=setTimeout(()=>setPulse(false),700);}
+  },[total]);
+  const save2=useCallback((t,l)=>{clearTimeout(stimer.current);stimer.current=setTimeout(()=>cnSave({title:t,lines:l}),500);},[]);
+  const resize=el=>{if(!el)return;el.style.height="auto";el.style.height=el.scrollHeight+"px";};
+  const onChange=(i,e)=>{const nl=[...lines];nl[i]=e.target.value;setLines(nl);resize(e.target);save2(title,nl);};
+  const onKD=(i,e)=>{
+    if(e.key==="Enter"){e.preventDefault();const el=refs.current[i],pos=el?.selectionStart??lines[i].length;const nl=[...lines.slice(0,i),lines[i].slice(0,pos),lines[i].slice(pos),...lines.slice(i+1)];setLines(nl);save2(title,nl);setTimeout(()=>{const nx=refs.current[i+1];if(nx){nx.focus();nx.setSelectionRange(0,0);resize(nx);}},0);}
+    if(e.key==="Backspace"){const el=refs.current[i],pos=el?.selectionStart??0;if(pos===0&&i>0){e.preventDefault();const pL=lines[i-1].length;const nl=[...lines.slice(0,i-1),lines[i-1]+lines[i],...lines.slice(i+1)];setLines(nl);save2(title,nl);setTimeout(()=>{const pv=refs.current[i-1];if(pv){pv.focus();pv.setSelectionRange(pL,pL);resize(pv);}},0);}}
+  };
+  const bg=dark?"#0d0d11":"#eeece8", pBg=dark?"#16161d":"#ffffff",
+        brd=dark?"#27273a":"#e5e0d8", txt=dark?"#f0effe":"#1a1a1a",
+        sub=dark?"#8887a8":"#999",    mut=dark?"#50506a":"#ccc";
+  return(
+    <div style={{position:"fixed",inset:0,zIndex:500,background:bg,display:"flex",flexDirection:"column",fontFamily:"'Atma','Outfit',sans-serif",animation:"cnUp .28s cubic-bezier(.4,0,.2,1)"}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"12px 16px 10px",borderBottom:`1px solid ${brd}`,background:pBg,flexShrink:0,boxShadow:dark?"0 2px 12px rgba(0,0,0,.4)":"0 1px 6px rgba(0,0,0,.07)"}}>
+        <div>
+          <div style={{fontSize:20,fontWeight:700,color:"#7c3aed",fontFamily:"'Atma',sans-serif",lineHeight:1.1}}>ক্যালনোট</div>
+          <div style={{fontSize:11,color:sub,marginTop:2,fontFamily:"'Atma',sans-serif"}}> </div>
+        </div>
+        <button onClick={onClose} style={{width:36,height:36,borderRadius:10,border:`1px solid ${brd}`,background:dark?"#1c1c26":"#f4f4f8",display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
+          <Ic k="close" z={16} c={sub}/>
+        </button>
+      </div>
+      <div style={{flex:1,overflowY:"auto",WebkitOverflowScrolling:"touch",padding:"14px 14px 60px"}}>
+        <div style={{background:pBg,borderRadius:18,border:`1px solid ${brd}`,overflow:"hidden",boxShadow:dark?"0 2px 16px rgba(0,0,0,.3)":"0 2px 16px rgba(0,0,0,.06)"}}>
+          <div style={{padding:"14px 16px 12px",borderBottom:`1px solid ${brd}`}}>
+            <input value={title} onChange={e=>{setTitle(e.target.value);save2(e.target.value,lines);}} placeholder="হিসাবের নাম লিখুন"
+              style={{width:"100%",background:"transparent",border:"none",outline:"none",fontFamily:"'Atma',sans-serif",fontSize:18,fontWeight:700,color:txt,caretColor:sub}}/>
+          </div>
+          {lines.map((line,i)=>(
+            <div key={i} style={{display:"flex",alignItems:"flex-start",borderBottom:i<lines.length-1?`1px solid ${brd}`:"none"}}>
+              <span style={{width:38,flexShrink:0,paddingTop:14,textAlign:"center",fontFamily:"'Atma',sans-serif",fontSize:11,fontWeight:600,color:mut,userSelect:"none"}}>{toBn2(i+1)}</span>
+              <textarea ref={el=>{refs.current[i]=el;}} rows={1} spellCheck={false} value={line}
+                onChange={e=>onChange(i,e)} onKeyDown={e=>onKD(i,e)} onFocus={e=>resize(e.target)}
+                style={{flex:1,background:"transparent",border:"none",outline:"none",resize:"none",overflow:"hidden",fontFamily:"'Atma',sans-serif",fontSize:16,fontWeight:400,lineHeight:1.85,color:txt,padding:"10px 8px 10px 0",minHeight:46,caretColor:sub,wordBreak:"break-word"}}/>
+              {lres[i]!==null&&<span style={{alignSelf:"center",marginRight:12,fontFamily:"'Atma',sans-serif",fontSize:12,fontWeight:600,color:sub,whiteSpace:"nowrap"}}>= {cnFmtNum(lres[i])}</span>}
+            </div>
+          ))}
+          <div style={{borderTop:`1.5px solid ${brd}`,padding:"13px 16px 16px",display:"flex",justifyContent:"flex-end"}}>
+            <span style={{fontFamily:"'Atma',sans-serif",fontSize:32,fontWeight:700,color:txt,letterSpacing:"-0.5px",display:"inline-block",transition:"transform .38s cubic-bezier(.34,1.56,.64,1)",transform:pulse?"scale(1.1)":"scale(1)"}}>
+              {cnFmtNum(total)}
+            </span>
+          </div>
+        </div>
+      </div>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Atma:wght@300;400;500;600;700&display=swap');
+        @keyframes cnUp{from{transform:translateY(100%);opacity:0}to{transform:translateY(0);opacity:1}}
+        @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        *, *::before, *::after {
+          transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease !important;
+        }
+        /* Slider track: only transition transform, managed by JS */
+        [data-track] {
+          transition: transform 0.38s cubic-bezier(.25,.46,.45,.94) !important;
+        }
+        /* Every other element: suppress transform transitions */
+        *:not([data-track]) {
+          transition-property: background-color, border-color, color, box-shadow !important;
+        }
+        input, textarea { transition: border-color 0.15s ease, background-color 0.15s ease !important; }
+        svg, svg * { transition: none !important; }
+      `}</style>
+    </div>
+  );
+}
+
 export default function Pennywise() {
   const [dark,       setDark]       = useState(true);
   const T = mkTheme(dark);
 
   // page index: 0=MEALS 1=BILLS 2=SUMMARY
   const [pageIdx,    setPageIdx]    = useState(0);
-  const [monthName,  setMonthName]  = useState("");
   const [toast,      setToast]      = useState(null);
   const [loaded,     setLoaded]     = useState(false);
   const [showReset,  setShowReset]  = useState(false);
@@ -133,6 +278,8 @@ export default function Pennywise() {
   const [editPerson,   setEditPerson]   = useState(null);
   const [showAddP,     setShowAddP]     = useState(false);
   const [newPName,     setNewPName]     = useState("");
+
+  const [showCalNote,  setShowCalNote]  = useState(false);
 
   // bills state
   const [bills,        setBills]        = useState(mkBills());
@@ -158,7 +305,6 @@ export default function Pennywise() {
       if(d){
         if(Array.isArray(d.people)&&d.people.length>0)
           setPeople(d.people.map(p=>({...p,meals:Array.isArray(p.meals)?[...p.meals,...newMeals()].slice(0,DAYS):newMeals()})));
-        if(typeof d.monthName==="string") setMonthName(d.monthName);
         if(typeof d.dark==="boolean")     setDark(d.dark);
         if(Array.isArray(d.bills)&&d.bills.length>0){
           const fixed=FIXED_BILLS.map(fb=>{
@@ -168,15 +314,14 @@ export default function Pennywise() {
           setBills([...fixed,...d.bills.filter(b=>b.custom)]);
         }
       }
-      // Pulse animation delays loader for smooth feel
-      setTimeout(() => setLoaded(true), 800);
+      setLoaded(true);
     })();
   },[]);
 
   useEffect(()=>{
     if(!loaded)return;
-    iSet("pw_main",{people,monthName,bills,dark});
-  },[people,monthName,bills,dark,loaded]);
+    iSet("pw_main",{people,bills,dark});
+  },[people,bills,dark,loaded]);
 
   // ── Toast ────────────────────────────────────────────────
   const notify=useCallback((msg,type="success")=>{
@@ -190,7 +335,7 @@ export default function Pennywise() {
     setPageIdx(n);
     idxRef.current=n;
     if(trackRef.current){
-      trackRef.current.style.transition="transform .32s cubic-bezier(.4,0,.2,1)";
+      trackRef.current.style.transition="transform .38s cubic-bezier(.25,.46,.45,.94)";
       trackRef.current.style.transform=`translateX(-${n*100/3}%)`;
     }
     // scroll to top
@@ -243,7 +388,7 @@ export default function Pennywise() {
     } else {
       // snap back
       if(trackRef.current){
-        trackRef.current.style.transition="transform .3s cubic-bezier(.4,0,.2,1)";
+        trackRef.current.style.transition="transform .38s cubic-bezier(.25,.46,.45,.94)";
         trackRef.current.style.transform=`translateX(-${idxRef.current*(100/3)}%)`;
       }
     }
@@ -284,22 +429,11 @@ export default function Pennywise() {
   };
   const resetAll =()=>{
     setPeople(p=>p.map(x=>({...x,market:"",meals:newMeals()})));
-    setBills(mkBills()); setMonthName(""); setShowReset(false); notify("Reset ✓");
+    setBills(mkBills()); setShowReset(false); notify("Reset ✓");
   };
 
   // ── Styles ───────────────────────────────────────────────
-  const card=(extra={})=>({
-    background: dark ? "rgba(22, 22, 29, 0.72)" : "rgba(255, 255, 255, 0.78)",
-    backdropFilter: "blur(16px)",
-    WebkitBackdropFilter: "blur(16px)",
-    borderRadius: 16,
-    border: `1px solid ${dark ? "rgba(255, 255, 255, 0.05)" : "rgba(0, 0, 0, 0.04)"}`,
-    overflow: "hidden",
-    boxShadow: dark 
-      ? "0 4px 24px -2px rgba(0, 0, 0, 0.4), 0 2px 8px -1px rgba(0, 0, 0, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.04)"
-      : "0 4px 20px -2px rgba(0, 0, 0, 0.05), 0 2px 6px -1px rgba(0, 0, 0, 0.02), inset 0 1px 0 rgba(255, 255, 255, 0.6)",
-    ...extra
-  });
+  const card=(extra={})=>({background:T.sur,borderRadius:16,border:`1px solid ${T.brd}`,overflow:"hidden",boxShadow:dark?"0 2px 14px rgba(0,0,0,.3)":"0 1px 10px rgba(0,0,0,.06)",...extra});
 
   const Btn=(v="primary")=>({
     padding:"11px 18px",borderRadius:11,cursor:"pointer",fontWeight:700,fontSize:14,fontFamily:F,
@@ -311,10 +445,10 @@ export default function Pennywise() {
     boxShadow:v==="primary"?"0 4px 14px rgba(124,58,237,.3)":v==="danger"?"0 3px 12px rgba(220,38,38,.28)":"none",
   });
 
-  const inp=(ex={})=>({width:"100%",padding:"11px 13px",borderRadius:11,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:15,fontWeight:600,fontFamily:F,boxSizing:"border-box",background:T.sur2,color:T.txt,transition:"all 0.25s cubic-bezier(0.4, 0, 0.2, 1)",...ex});
+  const inp=(ex={})=>({width:"100%",padding:"11px 13px",borderRadius:11,border:`1.5px solid ${T.brd2}`,outline:"none",fontSize:15,fontWeight:600,fontFamily:F,boxSizing:"border-box",background:T.sur2,color:T.txt,transition:"border-color .2s",...ex});
 
   const Chip=({ik,val,lbl,c})=>(
-    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0,transition: "all 0.3s"}}>
+    <div style={{flex:1,display:"flex",alignItems:"center",gap:9,padding:"10px 12px",background:T.sur,borderRadius:14,border:`1px solid ${T.brd}`,boxShadow:dark?"0 2px 10px rgba(0,0,0,.25)":"0 1px 8px rgba(0,0,0,.05)",minWidth:0}}>
       <Ic k={ik} z={18} c={c}/>
       <div style={{minWidth:0}}>
         <div style={{fontSize:17,fontWeight:800,color:c,letterSpacing:"-0.3px",lineHeight:1.1,fontFamily:F,whiteSpace:"nowrap"}}>{val}</div>
@@ -332,45 +466,6 @@ export default function Pennywise() {
     </div>
   );
 
-  // ── Loader Render (ONLY Logo, NO Text as requested) ──
-  if (!loaded) {
-    return (
-      <div style={{
-        height: "100dvh",
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        background: "#0d0d11",
-        overflow: "hidden",
-      }}>
-        <div style={{
-          width: 84,
-          height: 84,
-          borderRadius: 24,
-          background: "linear-gradient(135deg, #7c3aed, #a855f7)",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          boxShadow: "0 8px 32px rgba(124, 58, 237, 0.4)",
-          border: "1px solid rgba(255, 255, 255, 0.15)",
-          animation: "pw-pulse 1.8s infinite ease-in-out"
-        }}>
-          <svg viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{width: 42, height: 42}}>
-            <path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/>
-          </svg>
-        </div>
-        <style>{`
-          @keyframes pw-pulse {
-            0% { transform: scale(0.96); opacity: 0.8; }
-            50% { transform: scale(1.04); opacity: 1; filter: drop-shadow(0 0 16px rgba(124, 58, 237, 0.3)); }
-            100% { transform: scale(0.96); opacity: 0.8; }
-          }
-        `}</style>
-      </div>
-    );
-  }
-
   // ──────────────────────────────────────────────────────────
   // Page 0: MEALS
   const mealsJSX = (
@@ -378,20 +473,34 @@ export default function Pennywise() {
       {/* Panel header */}
       <div style={{marginBottom:2}}>
         <h2 style={{fontSize:20,fontWeight:900,color:T.txt,letterSpacing:"-0.5px",fontFamily:F,margin:0,lineHeight:1.2}}>Meals</h2>
-        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:3}}>Track daily meals & bazar contributions</p>
+        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:2}}>Track daily meals & bazar contributions</p>
       </div>
-      {/* Chips */}
-      <div style={{display:"flex",gap:10}}>
-        <Chip ik="cart"  val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc}/>
-        <Chip ik="users" val={people.length}      lbl="PEOPLE" c={T.grn}/>
-      </div>
-
+      {/* Chips + CalNote button */}
+      <div style={{display:"flex",gap:10,alignItems:"stretch"}}>
+        <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc}/>
+        <button
+          onClick={()=>setShowCalNote(true)}
+          style={{
+            flex:1, display:"flex", flexDirection:"column", alignItems:"flex-start",
+            gap:4, padding:"10px 13px",
+            background:dark?"linear-gradient(135deg,rgba(167,139,250,.12),rgba(124,58,237,.08))":"linear-gradient(135deg,#f5f3ff,#ede9fe)",
+            borderRadius:14, border:`1.5px solid ${dark?"rgba(167,139,250,.3)":"#c4b5fd"}`,
+            cursor:"pointer", boxShadow:dark?"0 2px 10px rgba(124,58,237,.2)":"0 2px 10px rgba(124,58,237,.1)",
+            transition:"all .2s",
+          }}
+        >
+          <div style={{display:"flex",alignItems:"center",gap:7}}>
+            <Ic k="note" z={18} c="#7c3aed"/>
+            <span style={{fontSize:14,fontWeight:800,color:"#7c3aed",fontFamily:F,letterSpacing:"-0.2px"}}>CalNote</span>
+          </div>
+          
+  
       {/* Person cards */}
       {pStats.map((p,i)=>{
         const cc=PAL[i%PAL.length], pos=p.bal>=0;
         const cL=dark?cc.dl:cc.ll, cT=dark?cc.dt:cc.lt;
         return (
-          <div key={i} style={card({borderLeft:`4px solid ${cc.bg}`})}>
+          <div key={i} style={card({borderLeft:`3px solid ${cc.bg}`})}>
             <div style={{padding:"14px 14px 0"}}>
               <div style={{display:"flex",alignItems:"center",gap:10,marginBottom:12}}>
                 <Avatar name={p.name} ci={i} size={40}/>
@@ -410,7 +519,7 @@ export default function Pennywise() {
                 </button>
               </div>
               <div style={{marginBottom:12}}>
-                <div style={{fontSize:10,color:T.mut,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:5,fontFamily:F}}>Bazar Amount</div>
+                <div style={{fontSize:10,color:T.mut,fontWeight:700,letterSpacing:"0.07em",textTransform:"uppercase",marginBottom:5,fontFamily:F}}>BAZAR</div>
                 <input type="number" min="0" value={p.market} onChange={e=>updMkt(i,e.target.value)} placeholder="0"
                   style={{...inp({border:`1.5px solid ${p.market?cc.bg+"88":T.brd2}`,color:p.market?cT:T.mut,background:p.market?cL:T.sur2,fontSize:18,fontWeight:800})}}/>
               </div>
@@ -448,7 +557,7 @@ export default function Pennywise() {
       {/* Meal table / chart */}
       <div style={card()}>
         <div style={{display:"flex",gap:4,padding:"10px 12px",borderBottom:`1px solid ${T.brd}`,background:T.sur2}}>
-          {[{k:"table",l:"TABLE"},{k:"pie",l:"PIE CHART"}].map(t=>(
+          {[{k:"table",l:"TABLE"},{k:"pie",l:"CHART"}].map(t=>(
             <button key={t.k} onClick={()=>setMealTab(t.k)} style={{flex:1,padding:"9px 0",borderRadius:10,border:"none",cursor:"pointer",fontWeight:700,fontSize:12,fontFamily:F,background:mealTab===t.k?"linear-gradient(135deg,#7c3aed,#a855f7)":"transparent",color:mealTab===t.k?"#fff":T.sub,boxShadow:mealTab===t.k?"0 2px 10px rgba(124,58,237,.3)":"none",transition:"all .15s"}}>{t.l}</button>
           ))}
         </div>
@@ -461,7 +570,7 @@ export default function Pennywise() {
                   <th style={{padding:"8px 10px",textAlign:"center",fontWeight:800,color:T.sub,borderBottom:`1px solid ${T.brd}`,fontSize:10,textTransform:"uppercase",letterSpacing:"0.07em",fontFamily:F,width:36}}>DAY</th>
                   {people.map((p,i)=>(
                     <th key={i} style={{padding:"10px 8px",borderBottom:`1px solid ${T.brd}`,minWidth:80}}>
-                       <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
+                      <div style={{display:"flex",alignItems:"center",justifyContent:"center",gap:5}}>
                         <Avatar name={p.name} ci={i} size={20}/>
                         <span style={{fontWeight:800,color:T.txt,fontSize:12,fontFamily:F,whiteSpace:"nowrap"}}>{p.name}</span>
                       </div>
@@ -594,7 +703,7 @@ export default function Pennywise() {
       {/* Panel header */}
       <div style={{marginBottom:2}}>
         <h2 style={{fontSize:20,fontWeight:900,color:T.txt,letterSpacing:"-0.5px",fontFamily:F,margin:0,lineHeight:1.2}}>Bills</h2>
-        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:3}}>Manage monthly household expenses</p>
+        <p style={{fontSize:12,color:T.sub,fontWeight:500,fontFamily:F,marginTop:2}}>Manage monthly household expenses</p>
       </div>
       {/* Chips */}
       <div style={{display:"flex",gap:10}}>
@@ -604,7 +713,7 @@ export default function Pennywise() {
 
       {/* Bill rows */}
       {bills.map((b,i)=>(
-        <div key={b.id} style={card({borderLeft:`4px solid ${b.color}`,padding:"13px 14px",display:"flex",alignItems:"center",gap:10,overflow:"visible"})}>
+        <div key={b.id} style={card({borderLeft:`3px solid ${b.color}`,padding:"13px 14px",display:"flex",alignItems:"center",gap:10,overflow:"visible"})}>
           <div style={{width:36,height:36,borderRadius:10,background:b.color+"1a",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
             <Ic k={b.ik||"receipt"} z={18} c={b.color}/>
           </div>
@@ -747,30 +856,16 @@ export default function Pennywise() {
     <div style={{height:"100dvh",display:"flex",flexDirection:"column",background:T.bg,fontFamily:F,color:T.txt,overflow:"hidden"}}>
 
       {toast&&<Toast msg={toast.msg} type={toast.type}/>}
+      {showCalNote&&<CalNoteApp onClose={()=>setShowCalNote(false)} T={T} dark={dark}/>}
       {showReset&&<ConfirmSheet title="Reset month?" body="All meals and bill amounts will be cleared. Cannot be undone." onOk={resetAll} onClose={()=>setShowReset(false)} T={T}/>}
 
-      {/* ── HEADER (Beautiful glassmorphism with original sizing rules) ── */}
-      <div style={{
-        background: dark ? "rgba(22, 22, 29, 0.8)" : "rgba(244, 244, 248, 0.8)",
-        backdropFilter: "blur(12px)",
-        WebkitBackdropFilter: "blur(12px)",
-        borderBottom: `1px solid ${dark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)"}`,
-        padding: "10px 14px",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        flexShrink: 0,
-        boxShadow: dark ? "0 4px 20px rgba(0, 0, 0, 0.3)" : "0 2px 10px rgba(0, 0, 0, 0.04)",
-        minHeight: 56,
-        zIndex: 10
-      }}>
+      {/* ── HEADER ── */}
+      <div style={{background:T.sur,borderBottom:`1px solid ${T.brd}`,padding:"10px 14px",display:"flex",alignItems:"center",justifyContent:"space-between",flexShrink:0,boxShadow:dark?"0 2px 16px rgba(0,0,0,.4)":"0 1px 8px rgba(0,0,0,.07)",minHeight:56}}>
         <span style={{fontSize:22,fontWeight:900,letterSpacing:"-0.8px",color:"#7c3aed",fontFamily:F}}>Pennywise</span>
         <div style={{display:"flex",alignItems:"center",gap:8}}>
-          <div style={{display:"flex",alignItems:"center",gap:6,padding:"7px 11px",borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2}}>
-            <Ic k="calendar" z={13} c={T.mut}/>
-            <input value={monthName} onChange={e=>setMonthName(e.target.value)} placeholder="Month"
-              style={{border:"none",outline:"none",fontSize:13,fontWeight:700,fontFamily:F,background:"transparent",color:T.txt,width:85}}/>
-          </div>
+          <span style={{fontSize:13,fontWeight:700,color:T.sub,fontFamily:F,letterSpacing:"0.04em"}}>
+            {new Date().toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"}).toUpperCase()}
+          </span>
           <button onClick={()=>setDark(d=>!d)} style={{width:36,height:36,borderRadius:10,border:`1.5px solid ${T.brd2}`,background:T.sur2,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer"}}>
             <Ic k={dark?"sun":"moon"} z={17} c={dark?"#fbbf24":"#7c3aed"}/>
           </button>
@@ -790,6 +885,7 @@ export default function Pennywise() {
         {/* Track: 300% wide, holds 3 panels */}
         <div
           ref={trackRef}
+          data-track="1"
           style={{display:"flex",width:"300%",height:"100%",willChange:"transform",transform:"translateX(0%)"}}
         >
           {/* Panel 0 */}
@@ -807,16 +903,8 @@ export default function Pennywise() {
         </div>
       </div>
 
-      {/* ── BOTTOM NAV (Glassmorphic layout with original text styles) ── */}
-      <div style={{
-        position:"fixed",bottom:0,left:0,right:0,zIndex:100,
-        background: dark ? "rgba(22, 22, 29, 0.85)" : "rgba(255, 255, 255, 0.88)",
-        backdropFilter: "blur(20px)",
-        WebkitBackdropFilter: "blur(20px)",
-        borderTop: `1px solid ${dark ? "rgba(255, 255, 255, 0.06)" : "rgba(0, 0, 0, 0.05)"}`,
-        display:"flex",padding:"6px 0 max(10px,env(safe-area-inset-bottom))",
-        boxShadow: dark ? "0 -8px 24px rgba(0,0,0,.4)" : "0 -4px 16px rgba(0,0,0,.05)"
-      }}>
+      {/* ── BOTTOM NAV ── */}
+      <div style={{position:"fixed",bottom:0,left:0,right:0,zIndex:100,background:T.sur,borderTop:`1px solid ${T.brd}`,display:"flex",padding:"6px 0 max(10px,env(safe-area-inset-bottom))",boxShadow:dark?"0 -4px 20px rgba(0,0,0,.35)":"0 -2px 14px rgba(0,0,0,.08)"}}>
         {[{idx:0,ik:"utensils",l:"MEALS"},{idx:1,ik:"receipt",l:"BILLS"},{idx:2,ik:"chart",l:"SUMMARY"}].map(n=>(
           <button key={n.idx} onClick={()=>goTo(n.idx)} style={{flex:1,padding:"4px 0",border:"none",background:"transparent",cursor:"pointer",display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
             <div style={{width:40,height:36,borderRadius:11,background:pageIdx===n.idx?T.accBg:"transparent",display:"flex",alignItems:"center",justifyContent:"center",transition:"background .15s"}}>
@@ -832,46 +920,20 @@ export default function Pennywise() {
         *{box-sizing:border-box;margin:0;padding:0;}
         html,body,#root{height:100%;overflow:hidden;}
         body{background:${T.bg};color:${T.txt};font-family:${F};-webkit-font-smoothing:antialiased;}
-        
-        /* Smooth Theme Transitions */
-        div, button, input, span, table, th, td, p, h2, select {
-          transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                      color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                      border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                      box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
-                      background 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
         input,select,button,td,th,span,div,p,h2,h3,label{font-family:${F}!important;}
-        
-        /* Reverted global inputs centering. Text position is naturally left-aligned as before! */
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
-        
-        /* Focus state micro-animation */
-        input:focus,select:focus{
-          border-color:${T.acc}!important;
-          box-shadow:0 0 0 3px ${dark?"rgba(167,139,250,.16)":"rgba(124,58,237,.12)"}!important;
-          transform: translateY(-1px);
-        }
-        
-        /* Premium button hover/active effects */
-        button {
-          transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1) !important;
-        }
-        button:hover {
-          transform: translateY(-1.5px);
-          filter: brightness(1.08);
-        }
-        button:active{
-          opacity:.8;
-          transform:scale(.96) translateY(0px) !important;
-        }
-        
+        input:focus,select:focus{border-color:${T.acc}!important;box-shadow:0 0 0 3px ${dark?"rgba(167,139,250,.16)":"rgba(124,58,237,.12)"}!important;}
         select option{background:${T.sur2};color:${T.txt};}
+        button:active{opacity:.8;transform:scale(.97);}
         ::-webkit-scrollbar{height:3px;width:3px;}
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:${T.brd2};border-radius:10px;}
         @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        *, *::before, *::after {
+          transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease !important;
+        }
+        svg, svg * { transition: none !important; }
+        input, textarea { transition: border-color 0.15s ease, background-color 0.15s ease !important; }
       `}</style>
     </div>
   );
