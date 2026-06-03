@@ -256,7 +256,7 @@ function SH({ ik, title, right, T }) {
 }
 
 export default function Pennywise() {
-  const [dark, setDark] = useState(true);
+  const [dark, setDark] = useState(false);
   const T = mkTheme(dark);
 
   // page index: 0=MEALS 1=BILLS 2=SUMMARY
@@ -470,7 +470,7 @@ export default function Pennywise() {
           onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
         >
           <Ic k="note" z={18} c="#7c3aed" />
-          <span style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>(TOTAL BAZAR)</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
         </div>
       </div>
 
@@ -898,7 +898,7 @@ export default function Pennywise() {
         @import url('https://fonts.googleapis.com/css2?family=Cause:wght@400;600;700;800;900&family=Outfit:wght@400;600;700;800;900&display=swap');
         *{box-sizing:border-box;margin:0;padding:0;}
         html,body,#root{height:100%;overflow:hidden;}
-        body{background:${T.bg};color:${T.txt};font-family:${F};-webkit-font-smoothing:antialiased;}
+        body{background:${T.bg};color:${T.txt};font-family:${F};-webkit-font-smoothing:antialiased;transition:background-color 0.3s ease-out,color 0.3s ease-out;}
         input,select,button,td,th,span,div,p,h2,h3,label{font-family:${F}!important;}
         input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none;}
         input:focus,select:focus{border-color:${T.acc}!important;box-shadow:0 0 0 3px ${dark ? "rgba(167,139,250,.16)" : "rgba(124,58,237,.12)"}!important;}
@@ -906,14 +906,14 @@ export default function Pennywise() {
         button:active{opacity:.8;transform:scale(.97);}
         ::-webkit-scrollbar{height:3px;width:3px;}
         ::-webkit-scrollbar-track{background:transparent;}
-        ::-webkit-scrollbar-thumb{background:${T.brd2};border-radius:10px;}
+        ::-webkit-scrollbar-thumb{background:${T.brd2};border-radius:10px;transition:background-color 0.2s ease-out;}
         @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
         @keyframes modalIn{from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);}}
-        *, *::before, *::after {
-          transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease !important;
-        }
+        @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
         svg, svg * { transition: none !important; }
-        input, textarea { transition: border-color 0.15s ease, background-color 0.15s ease !important; }
+        input, textarea { transition: border-color 0.2s ease-out, background-color 0.2s ease-out, color 0.2s ease-out !important; }
+        button { transition: background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out, color 0.2s ease-out !important; }
+        div { transition: background-color 0.2s ease-out, border-color 0.2s ease-out, color 0.2s ease-out, box-shadow 0.2s ease-out !important; }
       `}</style>
     </div>
   );
