@@ -94,17 +94,16 @@ function Toast({ msg, type }) {
 
 function ConfirmSheet({ title, body, onOk, onClose, T }) {
   return (
-    <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.6)", zIndex: 1000, backdropFilter: "blur(6px)", display: "flex", alignItems: "flex-end", justifyContent: "center" }}>
-      <div style={{ background: T.sur, borderRadius: "20px 20px 0 0", width: "100%", maxWidth: 520, padding: "16px 20px 32px", border: `1px solid ${T.brd2}`, boxShadow: "0 -8px 32px rgba(0,0,0,.4)" }}>
-        <div style={{ width: 40, height: 4, borderRadius: 2, background: T.brd2, margin: "0 auto 16px" }} />
-        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
-          <Ic k="warn" z={20} c={T.red} /><span style={{ fontWeight: 800, fontSize: 17, color: T.txt, fontFamily: F }}>{title}</span>
+    <div onClick={e => e.target === e.currentTarget && onClose()} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,.6)", zIndex: 1000, backdropFilter: "blur(6px)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+      <div style={{ background: T.sur, borderRadius: "20px", width: "calc(100% - 32px)", maxWidth: 420, padding: "28px 24px 24px", border: `1px solid ${T.brd2}`, boxShadow: "0 16px 48px rgba(0,0,0,.4)", animation: "modalIn .3s cubic-bezier(0.16, 1, 0.3, 1)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 12 }}>
+          <Ic k="warn" z={24} c={T.red} /><span style={{ fontWeight: 800, fontSize: 19, color: T.txt, fontFamily: F }}>{title}</span>
         </div>
-        <p style={{ color: T.sub, lineHeight: 1.7, marginBottom: 20, fontSize: 14, fontFamily: F }}>{body}</p>
+        <p style={{ color: T.sub, lineHeight: 1.7, marginBottom: 28, fontSize: 15, fontFamily: F }}>{body}</p>
         <div style={{ display: "flex", gap: 10 }}>
-          <button onClick={onClose} style={{ flex: 1, padding: "12px", borderRadius: 12, border: `1px solid ${T.brd2}`, background: T.sur2, color: T.sub, fontWeight: 700, fontSize: 14, fontFamily: F, cursor: "pointer" }}>Cancel</button>
-          <button onClick={onOk} style={{ flex: 1, padding: "12px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#dc2626,#ef4444)", color: "#fff", fontWeight: 700, fontSize: 14, fontFamily: F, cursor: "pointer", boxShadow: "0 4px 14px rgba(220,38,38,.35)" }}>
-            <Ic k="reset" z={14} c="#fff" /> Reset
+          <button onClick={onClose} style={{ flex: 1, padding: "13px", borderRadius: 12, border: `1px solid ${T.brd2}`, background: T.sur2, color: T.sub, fontWeight: 700, fontSize: 15, fontFamily: F, cursor: "pointer", transition: "all .2s" }}>Cancel</button>
+          <button onClick={onOk} style={{ flex: 1, padding: "13px", borderRadius: 12, border: "none", background: "linear-gradient(135deg,#dc2626,#ef4444)", color: "#fff", fontWeight: 700, fontSize: 15, fontFamily: F, cursor: "pointer", boxShadow: "0 6px 20px rgba(220,38,38,.4)", transition: "all .2s" }}>
+            <Ic k="reset" z={16} c="#fff" /> Reset
           </button>
         </div>
       </div>
@@ -332,7 +331,7 @@ export default function Pennywise() {
     setPageIdx(n);
     idxRef.current = n;
     if (trackRef.current) {
-      trackRef.current.style.transition = "transform .45s cubic-bezier(0.16, 1, 0.3, 1)";
+      trackRef.current.style.transition = "transform .6s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
       trackRef.current.style.transform = `translateX(-${n * 100 / 3}%)`;
     }
     // scroll to top
@@ -464,11 +463,14 @@ export default function Pennywise() {
             background: dark ? "linear-gradient(135deg,rgba(167,139,250,.12),rgba(124,58,237,.08))" : "linear-gradient(135deg,#f5f3ff,#ede9fe)",
             borderRadius: 14, border: `1.5px solid ${dark ? "rgba(167,139,250,.3)" : "#c4b5fd"}`,
             cursor: "pointer", boxShadow: dark ? "0 2px 10px rgba(124,58,237,.2)" : "0 2px 10px rgba(124,58,237,.1)",
-            transition: "all .2s",
+            transition: "all .2s", transform: "scale(1)",
           }}
+          onMouseDown={e => e.currentTarget.style.transform = "scale(0.96)"}
+          onMouseUp={e => e.currentTarget.style.transform = "scale(1)"}
+          onMouseLeave={e => e.currentTarget.style.transform = "scale(1)"}
         >
           <Ic k="note" z={18} c="#7c3aed" />
-          <span style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>CalNote</span>
+          <span style={{ fontSize: 18, fontWeight: 800, color: "#7c3aed", fontFamily: F, letterSpacing: "-0.2px" }}>(TOTAL BAZAR)</span>
         </div>
       </div>
 
@@ -884,10 +886,10 @@ export default function Pennywise() {
       <div style={{ position: "fixed", bottom: 0, left: 0, right: 0, zIndex: 100, background: T.sur, borderTop: `1px solid ${T.brd}`, display: "flex", padding: "6px 0 max(10px,env(safe-area-inset-bottom))", boxShadow: dark ? "0 -4px 20px rgba(0,0,0,.35)" : "0 -2px 14px rgba(0,0,0,.08)" }}>
         {[{ idx: 0, ik: "utensils", l: "MEALS" }, { idx: 1, ik: "receipt", l: "BILLS" }, { idx: 2, ik: "chart", l: "SUMMARY" }].map(n => (
           <button key={n.idx} onClick={() => goTo(n.idx)} style={{ flex: 1, padding: "4px 0", border: "none", background: "transparent", cursor: "pointer", display: "flex", flexDirection: "column", alignItems: "center", gap: 3 }}>
-            <div style={{ width: 40, height: 36, borderRadius: 11, background: pageIdx === n.idx ? T.accBg : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "background .15s" }}>
+            <div style={{ width: 40, height: 36, borderRadius: 11, background: pageIdx === n.idx ? T.accBg : "transparent", display: "flex", alignItems: "center", justifyContent: "center", transition: "all .3s cubic-bezier(0.4, 0, 0.2, 1)", transform: "scale(1)" }}>
               <Ic k={n.ik} z={22} c={pageIdx === n.idx ? T.acc : T.sub} />
             </div>
-            <span style={{ fontSize: 10, fontWeight: 700, color: pageIdx === n.idx ? T.acc : T.mut, fontFamily: F, letterSpacing: "0.04em", lineHeight: 1, marginTop: 1 }}>{n.l}</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: pageIdx === n.idx ? T.acc : T.mut, fontFamily: F, letterSpacing: "0.04em", lineHeight: 1, marginTop: 1, transition: "all .3s cubic-bezier(0.4, 0, 0.2, 1)" }}>{n.l}</span>
           </button>
         ))}
       </div>
@@ -906,6 +908,7 @@ export default function Pennywise() {
         ::-webkit-scrollbar-track{background:transparent;}
         ::-webkit-scrollbar-thumb{background:${T.brd2};border-radius:10px;}
         @keyframes tin{from{opacity:0;transform:translateX(-50%) translateY(8px);}to{opacity:1;transform:translateX(-50%) translateY(0);}}
+        @keyframes modalIn{from{opacity:0;transform:scale(0.92);}to{opacity:1;transform:scale(1);}}
         *, *::before, *::after {
           transition: background-color 0.14s ease, border-color 0.14s ease, color 0.14s ease, box-shadow 0.14s ease !important;
         }
