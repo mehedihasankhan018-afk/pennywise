@@ -914,6 +914,28 @@ export default function Pennywise() {
         input, textarea { transition: border-color 0.2s ease-out, background-color 0.2s ease-out, color 0.2s ease-out !important; }
         button { transition: background-color 0.2s ease-out, border-color 0.2s ease-out, box-shadow 0.2s ease-out, color 0.2s ease-out !important; }
         div { transition: background-color 0.2s ease-out, border-color 0.2s ease-out, color 0.2s ease-out, box-shadow 0.2s ease-out !important; }
+
+        /* Remove blue tap highlight, focus outline and active blue backgrounds on mobile and interactive elements */
+        button, a, [role="button"], input[type="button"], input[type="submit"], textarea, select, [style*="cursor: pointer"] {
+          -webkit-tap-highlight-color: transparent;
+          -webkit-touch-callout: none;
+          outline: none !important;
+          box-shadow: none !important;
+          background-color: transparent !important;
+        }
+
+        button:focus, a:focus, [role="button"]:focus, input:focus, textarea:focus, select:focus, [style*="cursor: pointer"]:focus {
+          outline: none !important;
+          box-shadow: none !important;
+          background-color: transparent !important;
+        }
+
+        /* Remove inner focus border on Firefox */
+        button::-moz-focus-inner { border: 0; padding: 0; }
+
+        /* Ensure links don't show highlight */
+        a, a:active, a:focus { -webkit-tap-highlight-color: transparent; }
+
       `}</style>
     </div>
   );
