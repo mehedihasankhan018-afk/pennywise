@@ -255,6 +255,15 @@ function SH({ ik, title, right, T }) {
   );
 }
 
+function PanelHeader({ title, subtitle, T }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, marginBottom: 6 }}>
+      <h2 style={{ fontSize: 18, fontWeight: 900, color: T.txt, letterSpacing: "-0.4px", fontFamily: F, margin: 0, lineHeight: 1.05 }}>{title}</h2>
+      {subtitle ? <p style={{ fontSize: 12, color: T.sub, fontWeight: 600, fontFamily: F, margin: 0, lineHeight: 1.15 }}>{subtitle}</p> : null}
+    </div>
+  );
+}
+
 export default function Pennywise() {
   const [dark, setDark] = useState(false);
   const T = mkTheme(dark);
@@ -448,10 +457,7 @@ export default function Pennywise() {
   const mealsJSX = (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Panel header */}
-      <div style={{ marginBottom: 2 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 900, color: T.txt, letterSpacing: "-0.5px", fontFamily: F, margin: 0, lineHeight: 1.2 }}>Meals</h2>
-        <p style={{ fontSize: 12, color: T.sub, fontWeight: 500, fontFamily: F, marginTop: 2 }}>Track daily meals & bazar contributions</p>
-      </div>
+      <PanelHeader title="Meals" subtitle="Track daily meals & bazar contributions" T={T} />
       {/* Chips + CalNote button */}
       <div style={{ display: "flex", gap: 10, alignItems: "stretch" }}>
         <Chip ik="cart" val={totMkt.toFixed(0)} lbl="TOTAL BAZAR" c={T.acc} T={T} dark={dark} />
@@ -680,10 +686,7 @@ export default function Pennywise() {
   const billsJSX = (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Panel header */}
-      <div style={{ marginBottom: 2 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 900, color: T.txt, letterSpacing: "-0.5px", fontFamily: F, margin: 0, lineHeight: 1.2 }}>Bills</h2>
-        <p style={{ fontSize: 12, color: T.sub, fontWeight: 500, fontFamily: F, marginTop: 2 }}>Manage monthly household expenses</p>
-      </div>
+      <PanelHeader title="Bills" subtitle="Manage monthly household expenses" T={T} />
       {/* Chips */}
       <div style={{ display: "flex", gap: 10 }}>
         <Chip ik="receipt" val={totBills.toFixed(0)} lbl="TOTAL BILLS" c={T.sky} T={T} dark={dark} />
@@ -729,10 +732,7 @@ export default function Pennywise() {
   const summaryJSX = (
     <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
       {/* Panel header */}
-      <div style={{ marginBottom: 2 }}>
-        <h2 style={{ fontSize: 20, fontWeight: 900, color: T.txt, letterSpacing: "-0.5px", fontFamily: F, margin: 0, lineHeight: 1.2 }}>Summary</h2>
-        <p style={{ fontSize: 12, color: T.sub, fontWeight: 500, fontFamily: F, marginTop: 3 }}>Full financial overview & settlement guide</p>
-      </div>
+      <PanelHeader title="Summary" subtitle="Full financial overview & settlement guide" T={T} />
       {/* Chips 2×2 */}
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
         <Chip ik="cart" val={totMkt.toFixed(0)} lbl="BAZAR" c={T.acc} T={T} dark={dark} />
