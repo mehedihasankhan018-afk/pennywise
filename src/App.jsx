@@ -258,7 +258,7 @@ function SH({ ik, title, right, T }) {
 function PanelHeader({ title, subtitle, T }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 6, marginBottom: 6 }}>
-      <h2 style={{ fontSize: 18, fontWeight: 900, color: T.txt, letterSpacing: "-0.4px", fontFamily: F, margin: 0, lineHeight: 1.05 }}>{title}</h2>
+      <h2 style={{ fontSize: 20, fontWeight: 900, color: T.txt, letterSpacing: "-0.4px", fontFamily: F, margin: 0, lineHeight: 1.05 }}>{title}</h2>
       {subtitle ? <p style={{ fontSize: 12, color: T.sub, fontWeight: 600, fontFamily: F, margin: 0, lineHeight: 1.15 }}>{subtitle}</p> : null}
     </div>
   );
